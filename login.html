@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log In — Virtual Wardrobe</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #1a1510; --cream: #f5f0e8; --warm-white: #faf8f4;
+    --gold: #b8965a; --gold-light: #e8d5b0; --charcoal: #2d2926;
+    --muted: #7a7165; --accent: #8b4c3c; --error: #c0392b;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--warm-white); color: var(--ink); min-height: 100vh; display: flex; flex-direction: column; }
+
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 3rem; border-bottom: 1px solid rgba(184,150,90,0.12); }
+  .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 600; letter-spacing: 0.04em; color: var(--ink); text-decoration: none; }
+  .nav-logo span { color: var(--gold); }
+  .nav-back { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; transition: color 0.2s; }
+  .nav-back:hover { color: var(--ink); }
+
+  .page-body { flex: 1; display: grid; grid-template-columns: 1fr 1fr; }
+
+  /* LEFT PANEL */
+  .left-panel { background: var(--ink); padding: 5rem 4rem; display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden; }
+  .panel-bg-text { position: absolute; bottom: -2rem; right: -1rem; font-family: 'Cormorant Garamond', serif; font-size: 14rem; font-weight: 300; color: rgba(184,150,90,0.06); line-height: 1; pointer-events: none; white-space: nowrap; }
+  .panel-eyebrow { font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); font-weight: 500; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+  .panel-eyebrow::before { content: ''; width: 1.5rem; height: 1px; background: var(--gold); }
+  .panel-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 3.5vw, 4rem); font-weight: 300; color: var(--cream); line-height: 1.1; margin-bottom: 2rem; }
+  .panel-title em { font-style: italic; color: var(--gold); }
+  .panel-desc { font-size: 0.85rem; color: rgba(245,240,232,0.5); line-height: 1.8; font-weight: 300; max-width: 320px; margin-bottom: 3rem; }
+
+  .aesthetic-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .pill { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.4rem 0.9rem; border: 1px solid rgba(184,150,90,0.25); color: rgba(245,240,232,0.45); font-weight: 500; }
+  .pill.active { border-color: var(--gold); color: var(--gold); }
+
+  /* RIGHT PANEL — form */
+  .right-panel { padding: 5rem 4rem; display: flex; flex-direction: column; justify-content: center; max-width: 560px; }
+  .form-eyebrow { font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); font-weight: 500; margin-bottom: 1rem; }
+  .form-title { font-family: 'Cormorant Garamond', serif; font-size: 2.8rem; font-weight: 300; margin-bottom: 0.5rem; line-height: 1.1; }
+  .form-subtitle { font-size: 0.85rem; color: var(--muted); margin-bottom: 2.5rem; font-weight: 300; }
+  .form-subtitle a { color: var(--gold); text-decoration: none; font-weight: 500; }
+  .form-subtitle a:hover { text-decoration: underline; }
+
+  .form-group { margin-bottom: 1.5rem; }
+  .form-label { display: block; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin-bottom: 0.6rem; }
+  .form-input { width: 100%; padding: 0.85rem 1rem; border: 1px solid rgba(184,150,90,0.25); background: var(--warm-white); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--ink); outline: none; transition: border-color 0.2s; }
+  .form-input:focus { border-color: var(--gold); }
+  .form-input::placeholder { color: rgba(122,113,101,0.4); }
+
+  .form-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+  .checkbox-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: var(--muted); cursor: pointer; }
+  .checkbox-label input { accent-color: var(--gold); width: 15px; height: 15px; }
+  .forgot-link { font-size: 0.75rem; color: var(--gold); text-decoration: none; letter-spacing: 0.05em; }
+  .forgot-link:hover { text-decoration: underline; }
+
+  .btn-submit { width: 100%; padding: 1rem; background: var(--ink); color: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 0.82rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; border: none; cursor: pointer; transition: background 0.25s; margin-bottom: 1.5rem; }
+  .btn-submit:hover { background: var(--gold); }
+
+  .divider { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+  .divider-line { flex: 1; height: 1px; background: rgba(184,150,90,0.2); }
+  .divider-text { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+
+  .social-btn { width: 100%; padding: 0.85rem; border: 1px solid rgba(184,150,90,0.25); background: none; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; color: var(--ink); letter-spacing: 0.06em; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .social-btn:hover { border-color: var(--gold); background: rgba(184,150,90,0.04); }
+
+  .error-msg { background: rgba(192,57,43,0.06); border: 1px solid rgba(192,57,43,0.2); padding: 0.75rem 1rem; font-size: 0.8rem; color: var(--error); margin-bottom: 1.5rem; display: none; }
+
+  footer { padding: 1.5rem 3rem; border-top: 1px solid rgba(184,150,90,0.1); display: flex; justify-content: space-between; }
+  .footer-copy { font-size: 0.7rem; color: var(--muted); }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a { font-size: 0.7rem; color: var(--muted); text-decoration: none; }
+  .footer-links a:hover { color: var(--gold); }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .animate { animation: fadeUp 0.6s ease both; }
+  .delay-1 { animation-delay: 0.1s; } .delay-2 { animation-delay: 0.2s; } .delay-3 { animation-delay: 0.3s; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Virtual<span>.</span>Wardrobe</a>
+  <a href="index.html" class="nav-back">← Back to Home</a>
+</nav>
+
+<div class="page-body">
+  <div class="left-panel">
+    <div class="panel-bg-text">LOG IN</div>
+    <div class="panel-eyebrow">Welcome Back</div>
+    <h2 class="panel-title">Your style<br>awaits <em>you.</em></h2>
+    <p class="panel-desc">Sign in to access your AI-curated wardrobe, saved outfit combinations, and weekly style plans.</p>
+    <div class="aesthetic-pills">
+      <div class="pill active">Quiet Luxury</div>
+      <div class="pill">Streetcore</div>
+      <div class="pill">Cottage Core</div>
+      <div class="pill">Y2K Revival</div>
+      <div class="pill">Old Money</div>
+      <div class="pill">Dark Academia</div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="form-eyebrow animate">Account Access</div>
+    <h1 class="form-title animate delay-1">Log In</h1>
+    <p class="form-subtitle animate delay-2">New here? <a href="signup.html">Create a free account →</a></p>
+
+    <div class="error-msg" id="errorMsg">Invalid email or password. Please try again.</div>
+
+    <form onsubmit="handleLogin(event)">
+      <div class="form-group animate delay-2">
+        <label class="form-label" for="email">Email Address</label>
+        <input class="form-input" type="email" id="email" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group animate delay-3">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-input" type="password" id="password" placeholder="••••••••" required>
+      </div>
+      <div class="form-row animate delay-3">
+        <label class="checkbox-label">
+          <input type="checkbox" checked> Keep me signed in
+        </label>
+        <a href="#" class="forgot-link">Forgot password?</a>
+      </div>
+      <button type="submit" class="btn-submit animate delay-3">Sign In →</button>
+    </form>
+
+    <div class="divider animate">
+      <div class="divider-line"></div>
+      <span class="divider-text">or continue with</span>
+      <div class="divider-line"></div>
+    </div>
+
+    <button class="social-btn animate" onclick="window.location.href='app.html'">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Continue with Google
+    </button>
+    <button class="social-btn animate" onclick="window.location.href='app.html'">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      Continue with GitHub
+    </button>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-copy">© 2026 Virtual Wardrobe</div>
+  <div class="footer-links">
+    <a href="#">Privacy</a><a href="#">Terms</a><a href="#">Support</a>
+  </div>
+</footer>
+
+<script>
+  function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errorMsg = document.getElementById('errorMsg');
+    if (email && password.length >= 6) {
+      window.location.href = 'app.html';
+    } else {
+      errorMsg.style.display = 'block';
+    }
+  }
+</script>
+</body>
+</html>

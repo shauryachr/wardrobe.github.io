@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Wardrobe — Virtual Wardrobe</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #1a1510; --cream: #f5f0e8; --warm-white: #faf8f4;
+    --gold: #b8965a; --gold-light: #e8d5b0; --charcoal: #2d2926;
+    --muted: #7a7165; --accent: #8b4c3c; --sidebar: #1e1b17;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--warm-white); color: var(--ink); height: 100vh; display: flex; overflow: hidden; }
+
+  /* SIDEBAR */
+  .sidebar { width: 220px; background: var(--sidebar); display: flex; flex-direction: column; flex-shrink: 0; border-right: 1px solid rgba(184,150,90,0.1); }
+  .sidebar-logo { padding: 1.5rem 1.5rem 1rem; font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 600; color: var(--cream); border-bottom: 1px solid rgba(184,150,90,0.1); text-decoration: none; display: block; }
+  .sidebar-logo span { color: var(--gold); }
+  .sidebar-nav { flex: 1; padding: 1rem 0; }
+  .nav-section { padding: 0.75rem 1.5rem 0.4rem; font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(245,240,232,0.2); font-weight: 500; }
+  .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1.5rem; font-size: 0.8rem; color: rgba(245,240,232,0.5); cursor: pointer; transition: all 0.2s; text-decoration: none; }
+  .nav-item:hover { color: rgba(245,240,232,0.85); background: rgba(184,150,90,0.06); }
+  .nav-item.active { color: var(--cream); background: rgba(184,150,90,0.12); border-right: 2px solid var(--gold); }
+  .nav-item svg { opacity: 0.6; flex-shrink: 0; }
+  .nav-item.active svg { opacity: 1; }
+  .sidebar-footer { padding: 1.25rem 1.5rem; border-top: 1px solid rgba(184,150,90,0.1); }
+  .user-info { display: flex; align-items: center; gap: 0.75rem; }
+  .user-avatar { width: 30px; height: 30px; border-radius: 50%; background: rgba(184,150,90,0.2); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--gold); font-weight: 500; }
+  .user-name { font-size: 0.78rem; color: rgba(245,240,232,0.65); font-weight: 400; }
+  .user-plan { font-size: 0.62rem; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* MAIN */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { padding: 1rem 2rem; border-bottom: 1px solid rgba(184,150,90,0.1); display: flex; align-items: center; justify-content: space-between; background: var(--warm-white); flex-shrink: 0; }
+  .topbar-title { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 300; }
+  .topbar-title em { font-style: italic; color: var(--accent); }
+  .topbar-actions { display: flex; gap: 0.75rem; align-items: center; }
+  .aesthetic-selector { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.85rem; border: 1px solid rgba(184,150,90,0.3); cursor: pointer; transition: border-color 0.2s; background: none; font-family: 'DM Sans', sans-serif; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); font-weight: 500; }
+  .aesthetic-selector:hover { border-color: var(--gold); }
+  .btn-generate { padding: 0.55rem 1.2rem; background: var(--ink); color: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; border: none; cursor: pointer; transition: background 0.2s; }
+  .btn-generate:hover { background: var(--gold); }
+  .ai-badge { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; color: var(--gold); padding: 0.35rem 0.75rem; border: 1px solid rgba(184,150,90,0.25); letter-spacing: 0.06em; }
+  .ai-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); animation: pulse 1.5s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .content { flex: 1; display: grid; grid-template-columns: 1fr 1fr 340px; overflow: hidden; }
+
+  /* UPLOAD PANEL */
+  .upload-panel { border-right: 1px solid rgba(184,150,90,0.1); padding: 1.5rem; overflow-y: auto; }
+  .panel-heading { font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.6rem; }
+  .panel-heading::after { content: ''; flex: 1; height: 1px; background: rgba(184,150,90,0.12); }
+
+  .upload-slot { border: 1.5px dashed rgba(184,150,90,0.25); padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.25s; margin-bottom: 1rem; position: relative; min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .upload-slot:hover, .upload-slot.dragover { border-color: var(--gold); background: rgba(184,150,90,0.03); }
+  .upload-slot.filled { border-style: solid; border-color: rgba(184,150,90,0.4); background: rgba(184,150,90,0.04); }
+  .upload-slot-icon { margin-bottom: 0.6rem; }
+  .upload-slot-label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; color: var(--muted); margin-bottom: 0.3rem; }
+  .upload-slot-hint { font-size: 0.68rem; color: rgba(122,113,101,0.5); font-weight: 300; }
+  .upload-slot.filled .upload-slot-label { color: var(--ink); }
+  .upload-slot.filled .upload-slot-hint { color: var(--gold); font-size: 0.65rem; letter-spacing: 0.06em; }
+  .upload-slot input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .preview-img { width: 60px; height: 60px; object-fit: cover; border: 1px solid rgba(184,150,90,0.3); margin-bottom: 0.5rem; }
+  .remove-btn { font-size: 0.62rem; color: var(--accent); cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 0.3rem; background: none; border: none; font-family: 'DM Sans', sans-serif; }
+  .remove-btn:hover { text-decoration: underline; }
+
+  .wardrobe-items { margin-top: 1.5rem; }
+  .wardrobe-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 0.75rem; }
+  .wardrobe-thumb { border: 1px solid rgba(184,150,90,0.15); aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color 0.2s; position: relative; background: var(--cream); overflow: hidden; }
+  .wardrobe-thumb:hover { border-color: var(--gold); }
+  .wardrobe-thumb.selected { border-color: var(--gold); border-width: 2px; }
+  .wardrobe-thumb .thumb-label { position: absolute; bottom: 0; left: 0; right: 0; padding: 0.25rem; background: rgba(26,21,16,0.6); font-size: 0.58rem; color: var(--cream); text-align: center; letter-spacing: 0.06em; text-transform: uppercase; }
+  .thumb-emoji { font-size: 1.8rem; line-height: 1; }
+
+  /* OUTFIT PANEL */
+  .outfit-panel { border-right: 1px solid rgba(184,150,90,0.1); padding: 1.5rem; overflow-y: auto; }
+  .outfit-display { margin-top: 0.75rem; }
+  .outfit-card { border: 1px solid rgba(184,150,90,0.2); padding: 1.25rem; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s; position: relative; background: var(--warm-white); }
+  .outfit-card:hover { border-color: rgba(184,150,90,0.5); }
+  .outfit-card.best { border-color: var(--gold); }
+  .best-badge { position: absolute; top: -1px; right: 1rem; background: var(--gold); color: var(--cream); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.2rem 0.6rem; font-weight: 500; }
+  .outfit-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+  .outfit-piece { width: 52px; height: 52px; border: 1px solid rgba(184,150,90,0.15); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; background: var(--cream); }
+  .outfit-plus { font-size: 0.7rem; color: rgba(122,113,101,0.3); align-self: center; }
+  .outfit-meta { display: flex; justify-content: space-between; align-items: center; }
+  .outfit-name { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 600; }
+  .outfit-score { font-size: 0.7rem; color: var(--gold); letter-spacing: 0.08em; font-weight: 500; }
+  .outfit-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.5rem; }
+  .tag { font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.2rem 0.5rem; border: 1px solid rgba(184,150,90,0.2); color: var(--muted); font-weight: 500; }
+  .empty-state { text-align: center; padding: 3rem 1rem; }
+  .empty-state p { font-size: 0.82rem; color: var(--muted); font-weight: 300; line-height: 1.7; }
+
+  /* AI PANEL */
+  .ai-panel { background: var(--ink); padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; }
+  .ai-panel .panel-heading { color: rgba(245,240,232,0.3); }
+  .ai-panel .panel-heading::after { background: rgba(184,150,90,0.1); }
+
+  .ai-output { flex: 1; }
+  .ai-message { font-size: 0.8rem; color: rgba(245,240,232,0.65); line-height: 1.75; font-weight: 300; margin-bottom: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid rgba(184,150,90,0.08); }
+  .ai-message strong { color: var(--cream); font-weight: 500; }
+  .ai-label { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); font-weight: 500; margin-bottom: 0.5rem; }
+
+  .score-display { margin-bottom: 1.5rem; }
+  .score-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; }
+  .score-name { font-size: 0.72rem; color: rgba(245,240,232,0.5); letter-spacing: 0.06em; }
+  .score-bar-wrap { flex: 1; margin: 0 0.75rem; height: 2px; background: rgba(184,150,90,0.12); }
+  .score-bar-fill { height: 100%; background: var(--gold); transition: width 0.8s ease; }
+  .score-val { font-size: 0.72rem; color: var(--gold); font-weight: 500; min-width: 2.5rem; text-align: right; }
+
+  .suggestion-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.5rem; }
+  .chip { font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.3rem 0.65rem; border: 1px solid rgba(184,150,90,0.2); color: rgba(245,240,232,0.45); cursor: pointer; transition: all 0.2s; font-weight: 500; }
+  .chip:hover { border-color: var(--gold); color: var(--gold); }
+
+  .ai-input-row { display: flex; gap: 0.5rem; margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(184,150,90,0.1); }
+  .ai-input { flex: 1; padding: 0.65rem 0.85rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(184,150,90,0.15); color: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 0.78rem; outline: none; transition: border-color 0.2s; }
+  .ai-input:focus { border-color: rgba(184,150,90,0.4); }
+  .ai-input::placeholder { color: rgba(245,240,232,0.2); }
+  .ai-send { padding: 0.65rem 0.85rem; background: rgba(184,150,90,0.15); border: 1px solid rgba(184,150,90,0.2); color: var(--gold); cursor: pointer; transition: background 0.2s; font-size: 0.8rem; }
+  .ai-send:hover { background: rgba(184,150,90,0.25); }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .typing { display: inline-flex; gap: 3px; align-items: center; padding: 0.5rem 0; }
+  .typing-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); animation: typingBounce 1.2s ease infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingBounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-4px)} }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <a href="index.html" class="sidebar-logo">Virtual<span>.</span>Wardrobe</a>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Wardrobe</div>
+    <a class="nav-item active" href="#">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" stroke="currentColor" stroke-width="1"/><rect x="8" y="1" width="5" height="5" stroke="currentColor" stroke-width="1"/><rect x="1" y="8" width="5" height="5" stroke="currentColor" stroke-width="1"/><rect x="8" y="8" width="5" height="5" stroke="currentColor" stroke-width="1"/></svg>
+      My Wardrobe
+    </a>
+    <a class="nav-item" href="#">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1 L13 4 L13 10 L7 13 L1 10 L1 4 Z" stroke="currentColor" stroke-width="1"/></svg>
+      Outfits
+    </a>
+    <a class="nav-item" href="#">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1"/><line x1="1" y1="5" x2="13" y2="5" stroke="currentColor" stroke-width="1"/><line x1="4" y1="1" x2="4" y2="3" stroke="currentColor" stroke-width="1"/><line x1="10" y1="1" x2="10" y2="3" stroke="currentColor" stroke-width="1"/></svg>
+      Week Planner
+    </a>
+    <div class="nav-section" style="margin-top:0.75rem;">Discover</div>
+    <a class="nav-item" href="#">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1"/><path d="M5 7 L7 9 L10 5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+      Aesthetics
+    </a>
+    <a class="nav-item" href="#">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1 L8.5 5.5 L13 5.5 L9.5 8 L11 12.5 L7 10 L3 12.5 L4.5 8 L1 5.5 L5.5 5.5 Z" stroke="currentColor" stroke-width="1"/></svg>
+      Inspiration
+    </a>
+    <div class="nav-section" style="margin-top:0.75rem;">Account</div>
+    <a class="nav-item" href="#">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="4" r="2.5" stroke="currentColor" stroke-width="1"/><path d="M1.5 13 Q1.5 9 7 9 Q12.5 9 12.5 13" stroke="currentColor" stroke-width="1"/></svg>
+      Profile
+    </a>
+    <a class="nav-item" href="index.html">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 7 L12 7 M9 4 L12 7 L9 10" stroke="currentColor" stroke-width="1" stroke-linecap="round"/><path d="M7 2 L2 2 L2 12 L7 12" stroke="currentColor" stroke-width="1"/></svg>
+      Log Out
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">AS</div>
+      <div>
+        <div class="user-name">Alex Sharma</div>
+        <div class="user-plan">Free Plan</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title">My <em>Wardrobe</em></div>
+    <div class="topbar-actions">
+      <div class="ai-badge"><div class="ai-dot"></div> AI Active</div>
+      <button class="aesthetic-selector" onclick="cycleAesthetic()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="#b8965a" stroke-width="1"/><circle cx="6" cy="6" r="1.5" fill="#b8965a"/></svg>
+        <span id="aestheticName">Quiet Luxury</span>
+      </button>
+      <button class="btn-generate" onclick="generateOutfits()">Generate Outfits →</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- UPLOAD PANEL -->
+    <div class="upload-panel">
+      <div class="panel-heading">Upload Clothing</div>
+
+      <!-- Upperwear -->
+      <div class="upload-slot" id="slot-upper" onclick="triggerUpload('upper')">
+        <input type="file" id="file-upper" accept="image/*" onchange="handleUpload(event, 'upper')">
+        <div class="upload-slot-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M4 9 L10 5 L14 8 L18 5 L24 9 L21 11 L21 23 L7 23 L7 11 Z" stroke="#b8965a" stroke-width="1" fill="rgba(184,150,90,0.08)"/></svg>
+        </div>
+        <div class="upload-slot-label" id="label-upper">Upper Wear</div>
+        <div class="upload-slot-hint" id="hint-upper">Click or drag to upload</div>
+      </div>
+
+      <!-- Lowerwear -->
+      <div class="upload-slot" id="slot-lower" onclick="triggerUpload('lower')">
+        <input type="file" id="file-lower" accept="image/*" onchange="handleUpload(event, 'lower')">
+        <div class="upload-slot-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M8 5 L20 5 L22 14 L18 23 L14 21 L10 23 L6 14 Z" stroke="#b8965a" stroke-width="1" fill="rgba(184,150,90,0.08)"/><line x1="14" y1="5" x2="14" y2="23" stroke="#b8965a" stroke-width="0.8" stroke-dasharray="2 1.5" opacity="0.5"/></svg>
+        </div>
+        <div class="upload-slot-label" id="label-lower">Lower Wear</div>
+        <div class="upload-slot-hint" id="hint-lower">Click or drag to upload</div>
+      </div>
+
+      <!-- Footwear -->
+      <div class="upload-slot" id="slot-foot" onclick="triggerUpload('foot')">
+        <input type="file" id="file-foot" accept="image/*" onchange="handleUpload(event, 'foot')">
+        <div class="upload-slot-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M5 18 Q7 14 12 15 L16 15 Q21 14 23 18 L22 21 Q14 24 6 21 Z" stroke="#b8965a" stroke-width="1" fill="rgba(184,150,90,0.08)" stroke-dasharray="3 1.5"/></svg>
+        </div>
+        <div class="upload-slot-label" id="label-foot">Footwear</div>
+        <div class="upload-slot-hint" id="hint-foot">Click or drag to upload</div>
+      </div>
+
+      <!-- Saved items -->
+      <div class="wardrobe-items">
+        <div class="panel-heading">Saved Items</div>
+        <div class="wardrobe-grid" id="wardrobeGrid">
+          <div class="wardrobe-thumb" onclick="selectThumb(this, '👔', 'Shirt')">
+            <span class="thumb-emoji">👔</span>
+            <div class="thumb-label">Shirt</div>
+          </div>
+          <div class="wardrobe-thumb" onclick="selectThumb(this, '👗', 'Dress')">
+            <span class="thumb-emoji">👗</span>
+            <div class="thumb-label">Dress</div>
+          </div>
+          <div class="wardrobe-thumb" onclick="selectThumb(this, '🧥', 'Coat')">
+            <span class="thumb-emoji">🧥</span>
+            <div class="thumb-label">Coat</div>
+          </div>
+          <div class="wardrobe-thumb" onclick="selectThumb(this, '👖', 'Trousers')">
+            <span class="thumb-emoji">👖</span>
+            <div class="thumb-label">Trousers</div>
+          </div>
+          <div class="wardrobe-thumb" onclick="selectThumb(this, '👟', 'Sneakers')">
+            <span class="thumb-emoji">👟</span>
+            <div class="thumb-label">Sneakers</div>
+          </div>
+          <div class="wardrobe-thumb" onclick="selectThumb(this, '👠', 'Heels')">
+            <span class="thumb-emoji">👠</span>
+            <div class="thumb-label">Heels</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTFIT PANEL -->
+    <div class="outfit-panel">
+      <div class="panel-heading">Generated Outfits</div>
+      <div class="outfit-display" id="outfitDisplay">
+        <div class="empty-state" id="emptyState">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="margin:0 auto 1rem;display:block;"><circle cx="20" cy="20" r="18" stroke="rgba(184,150,90,0.25)" stroke-width="1.5"/><path d="M14 20 L18 24 L26 16" stroke="rgba(184,150,90,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <p>Upload your clothing pieces and hit <strong style="color:var(--ink);font-weight:500;">Generate Outfits</strong> to see AI-curated combinations based on your chosen aesthetic.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI PANEL -->
+    <div class="ai-panel">
+      <div class="panel-heading" style="color:rgba(245,240,232,0.3);">AI Stylist</div>
+      <div class="ai-output" id="aiOutput">
+        <div class="ai-label">Style Analysis</div>
+        <div class="ai-message" id="aiAnalysis">
+          Welcome to your Virtual Wardrobe. Upload your pieces and I'll analyse your collection for <strong>Quiet Luxury</strong> compatibility, suggest outfit combinations, and provide colour harmony scores.
+        </div>
+
+        <div class="ai-label">Ask Your Stylist</div>
+        <div class="suggestion-chips">
+          <div class="chip" onclick="askQuestion('What aesthetic suits my wardrobe?')">Suggest aesthetic</div>
+          <div class="chip" onclick="askQuestion('What outfit works for a job interview?')">Interview outfit</div>
+          <div class="chip" onclick="askQuestion('Plan my outfits for the week')">Week planner</div>
+          <div class="chip" onclick="askQuestion('What am I missing in my wardrobe?')">Gap analysis</div>
+        </div>
+
+        <div id="chatMessages"></div>
+      </div>
+      <div class="ai-input-row">
+        <input class="ai-input" type="text" id="aiInputField" placeholder="Ask your AI stylist..." onkeydown="if(event.key==='Enter')sendMessage()">
+        <button class="ai-send" onclick="sendMessage()">→</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const aesthetics = ['Quiet Luxury', 'Streetcore', 'Cottage Core', 'Y2K Revival', 'Old Money', 'Dark Academia'];
+  let aestheticIdx = 0;
+  const uploads = { upper: null, lower: null, foot: null };
+
+  function cycleAesthetic() {
+    aestheticIdx = (aestheticIdx + 1) % aesthetics.length;
+    document.getElementById('aestheticName').textContent = aesthetics[aestheticIdx];
+  }
+
+  function triggerUpload(slot) {
+    document.getElementById('file-' + slot).click();
+  }
+
+  function handleUpload(event, slot) {
+    const file = event.target.files[0];
+    if (!file) return;
+    uploads[slot] = file.name;
+    const slotEl = document.getElementById('slot-' + slot);
+    const names = { upper: 'Upper Wear', lower: 'Lower Wear', foot: 'Footwear' };
+    slotEl.classList.add('filled');
+    slotEl.querySelector('.upload-slot-label').textContent = names[slot] + ' — Added';
+    slotEl.querySelector('.upload-slot-hint').textContent = '✓ ' + file.name.substring(0, 22) + (file.name.length > 22 ? '…' : '');
+    slotEl.querySelector('.upload-slot-icon').innerHTML = `<div style="width:52px;height:52px;background:rgba(184,150,90,0.12);border:1px solid rgba(184,150,90,0.3);display:flex;align-items:center;justify-content:center;font-size:1.5rem;">${slot === 'upper' ? '👔' : slot === 'lower' ? '👖' : '👟'}</div>`;
+    updateAIAnalysis();
+  }
+
+  function selectThumb(el, emoji, name) {
+    el.classList.toggle('selected');
+    updateAIAnalysis();
+  }
+
+  function updateAIAnalysis() {
+    const filled = Object.values(uploads).filter(Boolean).length;
+    const aes = aesthetics[aestheticIdx];
+    if (filled > 0) {
+      document.getElementById('aiAnalysis').innerHTML = `
+        Analysing your wardrobe for <strong>${aes}</strong> compatibility...<br><br>
+        ${filled} piece(s) uploaded. ${filled >= 2 ? 'Ready to generate outfit combinations.' : 'Add more pieces for better outfit matching.'}
+      `;
+    }
+  }
+
+  function generateOutfits() {
+    document.getElementById('emptyState') && (document.getElementById('emptyState').style.display = 'none');
+    const display = document.getElementById('outfitDisplay');
+    const aes = aesthetics[aestheticIdx];
+
+    const outfits = [
+      { name: 'The ' + aes + ' Edit', pieces: ['👔', '👖', '👟'], score: 94, tags: ['Office Ready', 'Polished', 'Versatile'], best: true },
+      { name: 'Effortless Day', pieces: ['🧥', '👗', '👠'], score: 87, tags: ['Casual', 'Elevated', 'Weekend'], best: false },
+      { name: 'Editorial Look', pieces: ['👗', '👖', '👟'], score: 81, tags: ['Creative', 'Asymmetric', 'Statement'], best: false },
+    ];
+
+    display.innerHTML = outfits.map(o => `
+      <div class="outfit-card ${o.best ? 'best' : ''}" style="animation:fadeUp 0.5s ease both;">
+        ${o.best ? '<div class="best-badge">Best Match</div>' : ''}
+        <div class="outfit-row">
+          ${o.pieces.map((p, i) => `<div class="outfit-piece">${p}</div>${i < o.pieces.length - 1 ? '<span class="outfit-plus">+</span>' : ''}`).join('')}
+        </div>
+        <div class="outfit-meta">
+          <div class="outfit-name">${o.name}</div>
+          <div class="outfit-score">${o.score}% match</div>
+        </div>
+        <div class="outfit-tags">${o.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      </div>
+    `).join('');
+
+    // Update AI panel with scores
+    const scoresHTML = `
+      <div class="ai-label" style="margin-top:1rem;">Aesthetic Scores</div>
+      <div class="score-display">
+        ${[['Style Coherence', 94], ['Color Harmony', 88], ['Occasion Fit', 91], ['Aesthetic Match', 94]].map(([n, v]) => `
+          <div class="score-row">
+            <span class="score-name">${n}</span>
+            <div class="score-bar-wrap"><div class="score-bar-fill" style="width:${v}%"></div></div>
+            <span class="score-val">${v}%</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    document.getElementById('aiAnalysis').innerHTML = `Your wardrobe shows strong <strong>${aes}</strong> alignment. The combination of neutral tones and clean silhouettes creates a cohesive, elevated palette. ${scoresHTML}`;
+  }
+
+  function askQuestion(q) {
+    document.getElementById('aiInputField').value = q;
+    sendMessage();
+  }
+
+  function sendMessage() {
+    const input = document.getElementById('aiInputField');
+    const msg = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+
+    const chatEl = document.getElementById('chatMessages');
+    const aes = aesthetics[aestheticIdx];
+
+    chatEl.innerHTML += `<div style="text-align:right;margin-bottom:0.75rem;"><span style="display:inline-block;background:rgba(184,150,90,0.12);border:1px solid rgba(184,150,90,0.2);padding:0.5rem 0.85rem;font-size:0.75rem;color:rgba(245,240,232,0.8);max-width:85%;text-align:left;">${msg}</span></div>`;
+
+    const typingId = 'typing_' + Date.now();
+    chatEl.innerHTML += `<div id="${typingId}" style="margin-bottom:0.75rem;"><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+    chatEl.scrollTop = chatEl.scrollHeight;
+
+    const responses = {
+      'aesthetic': `For your current wardrobe, <strong>${aes}</strong> is a natural fit. Your neutral palette and structured pieces align perfectly. Consider adding a cashmere layer to complete the look.`,
+      'interview': `For an interview, I recommend your cream linen shirt paired with straight-cut trousers. This combination achieves a confident, polished look with 91% professional occasion fit.`,
+      'week': `Planned! Monday: Quiet Luxury business look. Tuesday: Smart casual. Wednesday: Editorial. Thursday: Classic professional. Friday: Relaxed elevated casual.`,
+      'missing': `Gap analysis: Your wardrobe would benefit from a quality coat, one pair of loafers, and a versatile midi dress to unlock 12 additional outfit combinations.`,
+    };
+
+    const key = Object.keys(responses).find(k => msg.toLowerCase().includes(k)) || 'default';
+    const reply = responses[key] || `For <strong>${aes}</strong>, that's a great consideration. Based on your wardrobe pieces, I recommend focusing on tonal layering and clean silhouettes to maximise outfit combinations.`;
+
+    setTimeout(() => {
+      document.getElementById(typingId).remove();
+      chatEl.innerHTML += `<div style="margin-bottom:1rem;"><div class="ai-label" style="margin-bottom:0.35rem;">AI Stylist</div><div class="ai-message" style="border:none;padding:0;">${reply}</div></div>`;
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }, 1200);
+  }
+</script>
+</body>
+</html>
