@@ -9,13 +9,81 @@
 <!-- Firebase SDKs -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-         signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject, listAll }
-  from "https://www.gstatic.com/js/10.12.0/-storage.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove }
-  from "https://www.gstatic.com/js/10.12.0/-firestore.js";
+
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+  listAll
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDTkjqrZs1MSomIgHvGoiNpcUqU7B8xENE",
+  authDomain: "virtual-wardrobe-ai.firebaseapp.com",
+  projectId: "virtual-wardrobe-ai",
+  storageBucket: "virtual-wardrobe-ai.firebasestorage.app",
+  messagingSenderId: "420036428823",
+  appId: "1:420036428823:web:578e390e80ad85c39e8852",
+  measurementId: "G-HFYD2RFSF3"
+};
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+const storage = getStorage(app);
+const db = getFirestore(app);
+const gProvider = new GoogleAuthProvider();
+
+window._fb = {
+  auth,
+  storage,
+  db,
+  gProvider,
+
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+  listAll,
+
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove
+};
+
+console.log("Firebase Loaded Successfully");
+</script>
 
 // ─── 🔥 PASTE YOUR FIREBASE CONFIG HERE ──────────────────────
 const firebaseConfig = {
