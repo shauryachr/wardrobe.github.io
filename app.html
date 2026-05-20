@@ -6,7 +6,6 @@
 <title>Virtual Wardrobe — AI Stylist</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 
-<!-- Firebase SDKs — ALL paths corrected -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
@@ -54,7 +53,7 @@ console.log('✅ Firebase loaded OK');
 }
 body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--ink);height:100vh;display:flex;overflow:hidden}
 
-/* ── AUTH SCREEN ── */
+/* AUTH SCREEN */
 #authScreen{position:fixed;inset:0;background:var(--sidebar);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:0}
 .auth-box{width:360px;padding:2.4rem 2.2rem;background:#201d18;border:1px solid var(--border-strong)}
 .auth-logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--cream);text-align:center;margin-bottom:1.8rem;letter-spacing:.02em}
@@ -72,13 +71,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
 .btn-google:hover{border-color:var(--gold);color:var(--cream)}
 .auth-sep{text-align:center;font-size:.62rem;color:rgba(245,240,232,.2);margin:.65rem 0;letter-spacing:.1em;text-transform:uppercase}
 .auth-err{font-size:.68rem;color:#e07070;margin-bottom:.7rem;min-height:1rem;text-align:center}
-.auth-loading{opacity:.5;pointer-events:none}
 
-/* ── APP ── */
+/* APP */
 #appScreen{display:none;width:100%;height:100vh;overflow:hidden;flex-direction:row}
 #appScreen.visible{display:flex}
 
-/* SIDEBAR */
 .sidebar{width:210px;background:var(--sidebar);display:flex;flex-direction:column;flex-shrink:0;border-right:1px solid var(--border)}
 .sidebar-logo{padding:1.4rem 1.4rem 1rem;font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--cream);border-bottom:1px solid var(--border);text-decoration:none;display:block;letter-spacing:.02em}
 .sidebar-logo span{color:var(--gold)}
@@ -115,7 +112,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
 
 .content{flex:1;display:grid;grid-template-columns:280px 1fr 320px;overflow:hidden}
 
-/* UPLOAD PANEL */
 .upload-panel{border-right:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column}
 .panel-header{padding:1.1rem 1.25rem 0;flex-shrink:0}
 .panel-heading{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:.55rem;margin-bottom:.9rem}
@@ -153,7 +149,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
 .item-label{position:absolute;bottom:0;left:0;right:0;font-size:.48rem;text-align:center;background:rgba(26,21,16,.5);color:var(--cream);padding:.15rem;letter-spacing:.05em;text-transform:uppercase;z-index:2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .upload-status{font-size:.62rem;color:var(--gold);text-align:center;padding:.3rem;display:none}
 
-/* EXTRAS */
 .extras-section{margin-top:.5rem}
 .extras-row{margin-bottom:.9rem}
 .extras-label{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:.45rem}
@@ -169,7 +164,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
 .watch-opt.selected{border-color:var(--gold);background:var(--gold-dim);color:var(--ink)}
 .watch-emoji{font-size:1.1rem}
 
-/* OUTFIT PANEL */
 .outfit-panel{border-right:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column}
 .outfit-scroll{flex:1;overflow-y:auto;padding:1.1rem 1.4rem}
 .outfit-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem}
@@ -212,7 +206,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
 .score-mini-val{font-size:.6rem;color:var(--gold);font-weight:500;min-width:2rem;text-align:right}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-/* AI PANEL */
 .ai-panel{background:var(--sidebar);display:flex;flex-direction:column;overflow:hidden}
 .ai-scroll{flex:1;overflow-y:auto;padding:1.1rem 1.25rem}
 .ai-panel .panel-heading{color:rgba(245,240,232,.25)}
@@ -254,7 +247,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
 </head>
 <body>
 
-<!-- ── AUTH SCREEN ── -->
 <div id="authScreen">
   <div class="auth-box">
     <div class="auth-logo">Virtual<span>.</span>Wardrobe</div>
@@ -263,7 +255,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
       <button class="auth-tab" onclick="switchAuthTab('register')">Create Account</button>
     </div>
     <div id="authErr" class="auth-err"></div>
-
     <div id="tabLogin">
       <div class="auth-field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@example.com"></div>
       <div class="auth-field"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••"></div>
@@ -274,7 +265,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
         Continue with Google
       </button>
     </div>
-
     <div id="tabRegister" style="display:none">
       <div class="auth-field"><label>Display Name</label><input type="text" id="regName" placeholder="Alex Sharma"></div>
       <div class="auth-field"><label>Email</label><input type="email" id="regEmail" placeholder="you@example.com"></div>
@@ -289,7 +279,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
   </div>
 </div>
 
-<!-- ── APP SCREEN ── -->
 <div id="appScreen">
 <aside class="sidebar">
   <a href="#" class="sidebar-logo">Virtual<span>.</span>Wardrobe</a>
@@ -355,10 +344,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
         </div>
       </div>
       <div class="panel-scroll">
-
         <div id="cat-tops">
-          <div class="multi-upload-zone" id="drop-tops"
-            ondragover="onDragOver(event,'tops')" ondragleave="onDragLeave('tops')" ondrop="onDrop(event,'tops')">
+          <div class="multi-upload-zone" id="drop-tops" ondragover="onDragOver(event,'tops')" ondragleave="onDragLeave('tops')" ondrop="onDrop(event,'tops')">
             <input type="file" id="file-tops" accept="image/*" multiple onchange="handleMultiUpload(event,'tops')">
             <div class="upload-zone-icon"><svg width="30" height="30" viewBox="0 0 30 30" fill="none"><path d="M5 10 L11 6 L15 9 L19 6 L25 10 L22 12 L22 24 L8 24 L8 12 Z" stroke="#b8965a" stroke-width="1" fill="rgba(184,150,90,0.06)"/></svg></div>
             <div class="upload-zone-text"><strong>Upload Tops & Shirts</strong></div>
@@ -368,10 +355,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
           <div class="items-count">Tops <span id="tops-count">0 / 10</span></div>
           <div class="items-grid" id="grid-tops"></div>
         </div>
-
         <div id="cat-bottoms" style="display:none">
-          <div class="multi-upload-zone" id="drop-bottoms"
-            ondragover="onDragOver(event,'bottoms')" ondragleave="onDragLeave('bottoms')" ondrop="onDrop(event,'bottoms')">
+          <div class="multi-upload-zone" id="drop-bottoms" ondragover="onDragOver(event,'bottoms')" ondragleave="onDragLeave('bottoms')" ondrop="onDrop(event,'bottoms')">
             <input type="file" id="file-bottoms" accept="image/*" multiple onchange="handleMultiUpload(event,'bottoms')">
             <div class="upload-zone-icon"><svg width="30" height="30" viewBox="0 0 30 30" fill="none"><path d="M9 6 L21 6 L23 15 L19 24 L15 22 L11 24 L7 15 Z" stroke="#b8965a" stroke-width="1" fill="rgba(184,150,90,0.06)"/></svg></div>
             <div class="upload-zone-text"><strong>Upload Bottoms & Pants</strong></div>
@@ -381,10 +366,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
           <div class="items-count">Bottoms <span id="bottoms-count">0 / 10</span></div>
           <div class="items-grid" id="grid-bottoms"></div>
         </div>
-
         <div id="cat-shoes" style="display:none">
-          <div class="multi-upload-zone" id="drop-shoes"
-            ondragover="onDragOver(event,'shoes')" ondragleave="onDragLeave('shoes')" ondrop="onDrop(event,'shoes')">
+          <div class="multi-upload-zone" id="drop-shoes" ondragover="onDragOver(event,'shoes')" ondragleave="onDragLeave('shoes')" ondrop="onDrop(event,'shoes')">
             <input type="file" id="file-shoes" accept="image/*" multiple onchange="handleMultiUpload(event,'shoes')">
             <div class="upload-zone-icon"><svg width="30" height="30" viewBox="0 0 30 30" fill="none"><path d="M5 20 Q7 15 13 16 L18 16 Q23 15 25 20 L24 23 Q15 26 6 23 Z" stroke="#b8965a" stroke-width="1" fill="rgba(184,150,90,0.06)"/></svg></div>
             <div class="upload-zone-text"><strong>Upload Shoes & Footwear</strong></div>
@@ -394,7 +377,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
           <div class="items-count">Shoes <span id="shoes-count">0 / 10</span></div>
           <div class="items-grid" id="grid-shoes"></div>
         </div>
-
         <div id="cat-extras" style="display:none">
           <div class="extras-section">
             <div class="extras-row">
@@ -434,8 +416,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
             </div>
             <div class="extras-row">
               <div class="extras-label">Accessories</div>
-              <div class="multi-upload-zone" id="drop-accs"
-                ondragover="onDragOver(event,'accs')" ondragleave="onDragLeave('accs')" ondrop="onDrop(event,'accs')">
+              <div class="multi-upload-zone" id="drop-accs" ondragover="onDragOver(event,'accs')" ondragleave="onDragLeave('accs')" ondrop="onDrop(event,'accs')">
                 <input type="file" id="file-accs" accept="image/*" multiple onchange="handleMultiUpload(event,'accs')">
                 <div class="upload-zone-text" style="font-size:.68rem"><strong>Upload Accessories</strong></div>
                 <div class="upload-zone-hint">Bags, belts, scarves, jewellery · Up to 10</div>
@@ -446,7 +427,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
             </div>
           </div>
         </div>
-
       </div>
     </div>
 
@@ -511,18 +491,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
 </div>
 
 <script>
-// ── WAIT FOR FIREBASE ──────────────────────────────────
+// ── WAIT FOR FIREBASE ──
 function waitForFirebase(cb, tries=0) {
   if (window._fb) return cb();
-  if (tries > 60) {
-    console.error('Firebase failed to load after timeout');
-    setAuthErr('Firebase failed to initialise. Check your console for errors.');
-    return;
-  }
+  if (tries > 60) { setAuthErr('Firebase failed to initialise.'); return; }
   setTimeout(() => waitForFirebase(cb, tries+1), 150);
 }
 
-// ── GLOBALS ────────────────────────────────────────────
+// ── GLOBALS ──
 const aesthetics = ['Quiet Luxury','Streetcore','Old Money','Dark Academia','Cottage Core','Y2K Revival','Coastal Chic','Minimalist'];
 let aestheticIdx = 0;
 const wardrobe = { tops:[], bottoms:[], shoes:[], accs:[] };
@@ -535,14 +511,33 @@ const COLOR_MAP = {
   Camel:'#c4a882',Cobalt:'#1e3a5f'
 };
 
-// ── AUTH TABS ──────────────────────────────────────────
+// ── ANTHROPIC API HELPER ──
+// Adds the required header for direct browser calls
+async function callClaude(messages, maxTokens = 1000) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: maxTokens,
+      messages
+    })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return (data.content || []).map(c => c.text || '').join('').trim();
+}
+
+// ── AUTH TABS ──
 function switchAuthTab(tab) {
   document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
   document.getElementById('tabLogin').style.display = tab==='login'?'':'none';
   document.getElementById('tabRegister').style.display = tab==='register'?'':'none';
   document.getElementById('authErr').textContent = '';
 }
-
 function setAuthErr(msg) { document.getElementById('authErr').textContent = msg; }
 function setAuthLoading(loading) {
   document.getElementById('btnSignIn').disabled = loading;
@@ -551,9 +546,9 @@ function setAuthLoading(loading) {
   document.getElementById('btnRegister').textContent = loading ? 'Creating…' : 'Create Account';
 }
 
-// ── AUTH ACTIONS ───────────────────────────────────────
+// ── AUTH ACTIONS ──
 function emailSignIn() {
-  if (!window._fb) return setAuthErr('Still initialising — please wait a moment.');
+  if (!window._fb) return setAuthErr('Still initialising — please wait.');
   const { auth, signInWithEmailAndPassword } = window._fb;
   const email = document.getElementById('loginEmail').value.trim();
   const pass  = document.getElementById('loginPass').value;
@@ -562,9 +557,8 @@ function emailSignIn() {
   signInWithEmailAndPassword(auth, email, pass)
     .catch(e => { setAuthErr(friendlyErr(e.code)); setAuthLoading(false); });
 }
-
 function emailRegister() {
-  if (!window._fb) return setAuthErr('Still initialising — please wait a moment.');
+  if (!window._fb) return setAuthErr('Still initialising — please wait.');
   const { auth, db, createUserWithEmailAndPassword, doc, setDoc } = window._fb;
   const name  = document.getElementById('regName').value.trim();
   const email = document.getElementById('regEmail').value.trim();
@@ -575,14 +569,12 @@ function emailRegister() {
     .then(cred => setDoc(doc(db,'users',cred.user.uid), { name, email, createdAt: Date.now() }))
     .catch(e => { setAuthErr(friendlyErr(e.code)); setAuthLoading(false); });
 }
-
 function googleSignIn() {
-  if (!window._fb) return setAuthErr('Still initialising — please wait a moment.');
+  if (!window._fb) return setAuthErr('Still initialising — please wait.');
   const { auth, gProvider, signInWithPopup } = window._fb;
   setAuthErr('');
   signInWithPopup(auth, gProvider).catch(e => setAuthErr(friendlyErr(e.code)));
 }
-
 function doSignOut() {
   window._fb.signOut(window._fb.auth).then(() => {
     wardrobe.tops=[]; wardrobe.bottoms=[]; wardrobe.shoes=[]; wardrobe.accs=[];
@@ -591,7 +583,6 @@ function doSignOut() {
     document.getElementById('outfitDisplay').innerHTML = '<div class="empty-state"><p>Signed out. Sign in to continue.</p></div>';
   });
 }
-
 function friendlyErr(code) {
   const map = {
     'auth/invalid-email':'Invalid email address.',
@@ -601,15 +592,14 @@ function friendlyErr(code) {
     'auth/weak-password':'Password must be at least 6 characters.',
     'auth/popup-closed-by-user':'Sign-in popup was closed.',
     'auth/invalid-credential':'Email or password is incorrect.',
-    'auth/too-many-requests':'Too many attempts — wait a moment and try again.',
+    'auth/too-many-requests':'Too many attempts — wait and try again.',
     'auth/network-request-failed':'Network error — check your connection.',
   };
   return map[code] || `Error (${code}). Please try again.`;
 }
 
-// ── AUTH STATE ─────────────────────────────────────────
+// ── AUTH STATE ──
 waitForFirebase(() => {
-  console.log('Firebase ready, setting up auth listener');
   const { auth, onAuthStateChanged } = window._fb;
   onAuthStateChanged(auth, async user => {
     setAuthLoading(false);
@@ -639,7 +629,7 @@ async function getUserName(uid) {
   } catch { return null; }
 }
 
-// ── FIRESTORE: LOAD WARDROBE ───────────────────────────
+// ── FIRESTORE ──
 async function loadWardrobe() {
   if (!currentUser) return;
   const { db, doc, getDoc } = window._fb;
@@ -648,18 +638,12 @@ async function loadWardrobe() {
     if (!snap.exists()) return;
     const data = snap.data();
     ['tops','bottoms','shoes','accs'].forEach(cat => {
-      wardrobe[cat] = (data[cat] || []).map(item => ({
-        url: item.url, name: item.name, storagePath: item.storagePath
-      }));
-      renderGrid(cat);
-      updateCount(cat);
+      wardrobe[cat] = (data[cat] || []).map(item => ({ url: item.url, name: item.name, storagePath: item.storagePath }));
+      renderGrid(cat); updateCount(cat);
     });
-    updateAnalysis();
-    showToast('Wardrobe loaded ✓');
+    updateAnalysis(); showToast('Wardrobe loaded ✓');
   } catch(e) { console.error('Load error', e); }
 }
-
-// ── FIRESTORE: SAVE WARDROBE ───────────────────────────
 async function saveWardrobeToFirestore() {
   if (!currentUser) return;
   const { db, doc, setDoc } = window._fb;
@@ -670,7 +654,7 @@ async function saveWardrobeToFirestore() {
   await setDoc(doc(db,'wardrobes',currentUser.uid), data);
 }
 
-// ── STORAGE: UPLOAD FILE ───────────────────────────────
+// ── STORAGE ──
 async function uploadToStorage(file, cat) {
   const { storage, ref, uploadBytes, getDownloadURL } = window._fb;
   const path = `wardrobes/${currentUser.uid}/${cat}/${Date.now()}_${file.name}`;
@@ -679,15 +663,13 @@ async function uploadToStorage(file, cat) {
   const url = await getDownloadURL(snap.ref);
   return { url, storagePath: path };
 }
-
-// ── STORAGE: DELETE FILE ───────────────────────────────
 async function deleteFromStorage(storagePath) {
   if (!storagePath) return;
   const { storage, ref, deleteObject } = window._fb;
   try { await deleteObject(ref(storage, storagePath)); } catch {}
 }
 
-// ── DRAG & DROP ────────────────────────────────────────
+// ── DRAG & DROP ──
 function onDragOver(e,cat){ e.preventDefault(); document.getElementById('drop-'+cat).classList.add('drag-over'); }
 function onDragLeave(cat){ document.getElementById('drop-'+cat).classList.remove('drag-over'); }
 function onDrop(e,cat){ e.preventDefault(); onDragLeave(cat); processFiles(Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/')),cat); }
@@ -699,11 +681,9 @@ async function processFiles(files, cat) {
   if (slots<=0) return showToast(`Max ${MAX} items for this category`);
   const toAdd = files.slice(0,slots);
   if (!toAdd.length) return;
-
   const statusEl = document.getElementById('uploadStatus-'+cat);
   statusEl.style.display = 'block';
   statusEl.textContent = `Uploading ${toAdd.length} item${toAdd.length>1?'s':''}…`;
-
   for (const file of toAdd) {
     try {
       const { url, storagePath } = await uploadToStorage(file, cat);
@@ -711,16 +691,13 @@ async function processFiles(files, cat) {
       wardrobe[cat].push({ url, name, storagePath });
     } catch(e) { showToast('Upload failed: '+e.message); }
   }
-
-  renderGrid(cat);
-  updateCount(cat);
-  updateAnalysis();
+  renderGrid(cat); updateCount(cat); updateAnalysis();
   await saveWardrobeToFirestore();
   statusEl.style.display = 'none';
   showToast(`${toAdd.length} item${toAdd.length>1?'s':''} saved to your account`);
 }
 
-// ── RENDER GRID ────────────────────────────────────────
+// ── RENDER ──
 function renderGrid(cat) {
   const grid = document.getElementById('grid-'+cat);
   const emojis = { tops:'👔', bottoms:'👖', shoes:'👟', accs:'👜' };
@@ -737,30 +714,26 @@ function renderGrid(cat) {
       </div>
     </div>`).join('');
 }
-
 function updateCount(cat){ document.getElementById(cat+'-count').textContent=wardrobe[cat].length+' / '+MAX; }
-
 async function removeItem(e,cat,idx) {
   e.stopPropagation();
-  const item = wardrobe[cat][idx];
-  await deleteFromStorage(item.storagePath);
+  await deleteFromStorage(wardrobe[cat][idx].storagePath);
   wardrobe[cat].splice(idx,1);
   renderGrid(cat); updateCount(cat); updateAnalysis();
   await saveWardrobeToFirestore();
   showToast('Item removed');
 }
-
 function toggleItem(cat,idx) {
   wardrobe[cat][idx].selected = !wardrobe[cat][idx].selected;
   document.getElementById(`th-${cat}-${idx}`).classList.toggle('selected',wardrobe[cat][idx].selected);
 }
 
-// ── EXTRAS ─────────────────────────────────────────────
+// ── EXTRAS ──
 function toggleColor(el){ el.classList.toggle('selected'); }
 function selectWatch(el){ document.querySelectorAll('.watch-opt').forEach(w=>w.classList.remove('selected')); el.classList.add('selected'); }
 function toggleOccasion(el){ el.classList.toggle('selected'); }
 
-// ── AESTHETIC ──────────────────────────────────────────
+// ── AESTHETIC ──
 function cycleAesthetic() {
   aestheticIdx=(aestheticIdx+1)%aesthetics.length;
   document.getElementById('aestheticName').textContent=aesthetics[aestheticIdx];
@@ -772,7 +745,7 @@ function switchCat(cat,btn) {
   document.getElementById('cat-'+cat).style.display='block'; btn.classList.add('active');
 }
 
-// ── ANALYSIS ───────────────────────────────────────────
+// ── ANALYSIS ──
 function updateAnalysis() {
   const t=wardrobe.tops.length,b=wardrobe.bottoms.length,s=wardrobe.shoes.length,aes=aesthetics[aestheticIdx];
   let msg;
@@ -789,7 +762,7 @@ function updateAnalysis() {
   document.getElementById('aiAnalysis').innerHTML=msg;
 }
 
-// ── GENERATE COMBOS ────────────────────────────────────
+// ── GENERATE COMBOS ──
 async function generateCombos() {
   const t=wardrobe.tops.length,b=wardrobe.bottoms.length,s=wardrobe.shoes.length;
   if(!t||!b||!s) return showToast('Add at least 1 top, 1 bottom & 1 pair of shoes');
@@ -806,14 +779,15 @@ async function generateCombos() {
   const prompt=`You are a world-class personal stylist AI. Generate 4 outfit combinations.
 WARDROBE: Tops(${t}):${topNames} | Bottoms(${b}):${botNames} | Shoes(${s}):${shoeNames} | Accessories:${wardrobe.accs.length}
 PREFERENCES: Aesthetic:${aes} | Colors:${colors.join(',')||'none'} | Watch:${watch} | Occasions:${occasions.join(',')||'general'}
-Return ONLY a JSON array, no markdown:
+Return ONLY a valid JSON array with no markdown, no explanation, no backticks:
 [{"name":"..","top":1,"bottom":1,"shoes":1,"score":94,"occasion":"Work","desc":"..","tags":[".."],"extra":"..","colorHarmony":91,"occasionFit":88,"aestheticMatch":95,"versatility":82}]`;
   try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
-    const data=await res.json();
-    const raw=(data.content||[]).map(c=>c.text||'').join('');
-    lastCombos=JSON.parse(raw.replace(/```json|```/g,'').trim());
-  } catch { lastCombos=buildFallback(aes,t,b,s); }
+    const raw = await callClaude([{role:'user',content:prompt}], 1200);
+    lastCombos = JSON.parse(raw.replace(/```json|```/g,'').trim());
+  } catch(e) {
+    console.warn('AI combo generation failed, using fallback:', e);
+    lastCombos = buildFallback(aes,t,b,s);
+  }
   renderCombos(lastCombos); renderScores(lastCombos,aes,colors);
   document.getElementById('comboSort').style.display='block';
 }
@@ -871,7 +845,6 @@ function toggleSave(e,idx) {
   const badge=document.getElementById('savedBadge');
   badge.textContent=savedCombos.length; badge.style.display=savedCombos.length?'inline':'none';
 }
-
 function sortCombos(by) {
   if(!lastCombos.length)return;
   const s=[...lastCombos];
@@ -880,7 +853,6 @@ function sortCombos(by) {
   else s.sort((a,b)=>b.score-a.score);
   renderCombos(s);
 }
-
 function showSaved(e) {
   e.preventDefault();
   if(!savedCombos.length){showToast('No saved outfits yet');return;}
@@ -903,8 +875,9 @@ function renderScores(combos,aes,colors) {
   document.getElementById('aiAnalysis').innerHTML=`Your <strong>${aes}</strong> wardrobe scores <strong>${avg}%</strong> average match across ${combos.length} combinations. Watch: <strong>${watch}</strong>. Click any outfit to expand.`;
 }
 
-// ── AI CHAT ────────────────────────────────────────────
+// ── AI CHAT ──
 async function askQuestion(q){ document.getElementById('aiInputField').value=q; await sendMessage(); }
+
 async function sendMessage() {
   const input=document.getElementById('aiInputField');
   const msg=input.value.trim(); if(!msg)return;
@@ -920,11 +893,10 @@ async function sendMessage() {
   const watch=document.querySelector('.watch-opt.selected')?.textContent?.trim().split('\n').pop()?.trim()||'Classic';
   const ctx=`Wardrobe:${t} tops,${b} bottoms,${s} shoes,${wardrobe.accs.length} accessories. Colors:${colors.join(',')||'none'}. Watch:${watch}. Occasions:${occasions.join(',')||'general'}. Aesthetic:${aes}.`;
   try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`You are a concise expert stylist. Context:${ctx}\nUser:${msg}\nReply in 2-3 short paragraphs. Use <strong> for key style terms.`}]})});
-    const data=await res.json();
-    const reply=(data.content||[]).map(c=>c.text||'').join('').trim();
+    const reply = await callClaude([{role:'user',content:`You are a concise expert personal stylist. Context:${ctx}\nUser question:${msg}\nReply in 2-3 short paragraphs. Use <strong> tags for key style terms only.`}], 800);
     document.getElementById(typId).outerHTML=aiBubble(reply);
-  } catch {
+  } catch(e) {
+    console.warn('Chat error:', e);
     document.getElementById(typId).outerHTML=aiBubble(`For <strong>${aes}</strong>, focus on tonal dressing and clean silhouettes. Your wardrobe suggests a coherent palette — lean into monochromatic combinations with texture variation.`);
   }
   scrollAI();
@@ -940,3 +912,9 @@ function showToast(msg) {
 </script>
 </body>
 </html>
+
+
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
