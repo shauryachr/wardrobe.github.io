@@ -243,6 +243,44 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
 .ai-send:hover{background:rgba(184,150,90,.25)}
 
 .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--ink);color:var(--cream);padding:.65rem 1.1rem;font-size:.72rem;letter-spacing:.06em;border-left:3px solid var(--gold);animation:fadeUp .3s ease;z-index:9999;pointer-events:none}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(20,16,11,.72);display:none;align-items:center;justify-content:center;z-index:1000;padding:2rem;backdrop-filter:blur(2px)}
+.modal-overlay.visible{display:flex}
+.modal-box{background:var(--warm-white);width:100%;max-width:760px;max-height:86vh;display:flex;flex-direction:column;border:1px solid var(--border-strong);box-shadow:0 20px 60px rgba(0,0,0,.35);animation:fadeUp .25s ease}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.6rem;border-bottom:1px solid var(--border);flex-shrink:0}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600}
+.modal-title em{font-style:italic;color:var(--accent)}
+.modal-sub{font-size:.7rem;color:var(--muted);margin-top:.15rem;font-weight:400}
+.modal-close{background:none;border:1px solid var(--border);color:var(--muted);width:28px;height:28px;cursor:pointer;font-size:.85rem;line-height:1;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.modal-close:hover{border-color:var(--gold);color:var(--gold)}
+.modal-body{flex:1;overflow-y:auto;padding:1.5rem 1.6rem}
+
+/* Aesthetics grid */
+.aesthetics-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem}
+.aes-card{border:1.5px solid var(--border);padding:1.1rem 1.2rem;cursor:pointer;transition:all .2s;position:relative;background:var(--cream)}
+.aes-card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.aes-card.active{border-color:var(--gold);background:var(--gold-dim)}
+.aes-card.active::after{content:'✦ Active';position:absolute;top:.7rem;right:.8rem;font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.aes-name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;margin-bottom:.35rem}
+.aes-desc{font-size:.7rem;color:var(--muted);line-height:1.6;font-weight:300}
+
+/* Inspiration */
+.insp-toolbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.2rem;flex-wrap:wrap}
+.insp-current{font-size:.72rem;color:var(--muted)}
+.insp-current strong{color:var(--gold)}
+.btn-insp-refresh{padding:.45rem 1rem;background:var(--ink);color:var(--cream);border:none;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;font-weight:500;cursor:pointer;transition:background .2s;white-space:nowrap}
+.btn-insp-refresh:hover{background:var(--gold)}
+.btn-insp-refresh:disabled{opacity:.4;cursor:not-allowed}
+.insp-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;gap:1rem}
+.insp-empty{text-align:center;padding:2.5rem 1.5rem;color:var(--muted);font-size:.78rem;line-height:1.8;font-weight:300}
+.insp-card{border:1px solid var(--border);padding:1.1rem 1.2rem;margin-bottom:.8rem;animation:fadeUp .4s ease both}
+.insp-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem;margin-bottom:.4rem}
+.insp-card-name{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600}
+.insp-card-tag{font-size:.55rem;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(184,150,90,.3);padding:.15rem .5rem;white-space:nowrap;flex-shrink:0}
+.insp-card-desc{font-size:.74rem;color:var(--muted);line-height:1.7;font-weight:300;margin-bottom:.5rem}
+.insp-card-pieces{display:flex;gap:.35rem;flex-wrap:wrap}
+.insp-piece{font-size:.58rem;letter-spacing:.06em;text-transform:uppercase;padding:.18rem .45rem;background:var(--gold-dim);color:var(--ink);font-weight:500}
 </style>
 </head>
 <body>
@@ -297,11 +335,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
       Week Planner
     </a>
     <div class="nav-section" style="margin-top:.6rem">Discover</div>
-    <a class="nav-item" href="#">
+    <a class="nav-item" href="#" id="navAesthetics" onclick="openAestheticsModal(event)">
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1"/><circle cx="6.5" cy="6.5" r="1.5" fill="currentColor"/></svg>
       Aesthetics
     </a>
-    <a class="nav-item" href="#">
+    <a class="nav-item" href="#" id="navInspiration" onclick="openInspirationModal(event)">
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1 L8 5 L12 5 L9 7.5 L10.5 11.5 L6.5 9.2 L2.5 11.5 L4 7.5 L1 5 L5 5 Z" stroke="currentColor" stroke-width="1"/></svg>
       Inspiration
     </a>
@@ -490,6 +528,44 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
 </main>
 </div>
 
+<!-- AESTHETICS MODAL -->
+<div class="modal-overlay" id="aestheticsModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Choose Your <em>Aesthetic</em></div>
+        <div class="modal-sub">This sets the styling lens the AI uses for combos & inspiration</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('aestheticsModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="aesthetics-grid" id="aestheticsGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- INSPIRATION MODAL -->
+<div class="modal-overlay" id="inspirationModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Style <em>Inspiration</em></div>
+        <div class="modal-sub">AI-generated ideas built from your wardrobe & aesthetic</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('inspirationModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="insp-toolbar">
+        <div class="insp-current">Aesthetic: <strong id="inspAestheticLabel">Quiet Luxury</strong></div>
+        <button class="btn-insp-refresh" id="btnInspRefresh" onclick="generateInspiration()">✦ New Ideas</button>
+      </div>
+      <div id="inspirationBody">
+        <div class="insp-empty">Click <strong>✦ New Ideas</strong> to get AI styling concepts based on your uploaded wardrobe and chosen aesthetic.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── WAIT FOR FIREBASE ──
 function waitForFirebase(cb, tries=0) {
@@ -500,6 +576,16 @@ function waitForFirebase(cb, tries=0) {
 
 // ── GLOBALS ──
 const aesthetics = ['Quiet Luxury','Streetcore','Old Money','Dark Academia','Cottage Core','Y2K Revival','Coastal Chic','Minimalist'];
+const aestheticDescriptions = {
+  'Quiet Luxury':'Understated tailoring, neutral tones, and quality over logos. Confidence without shouting.',
+  'Streetcore':'Bold silhouettes, sneakers, and layered streetwear with an urban, lived-in edge.',
+  'Old Money':'Heritage tailoring, tennis-club polish, tweed and cable knits — timeless and inherited-looking.',
+  'Dark Academia':'Moody tones, blazers, turtlenecks and vintage tailoring inspired by old libraries and ivy halls.',
+  'Cottage Core':'Soft florals, linen, and pastoral ease — romantic, handmade, and unhurried.',
+  'Y2K Revival':'Low-rise, metallics, mini bags and playful nostalgia from the early 2000s.',
+  'Coastal Chic':'Breezy linen, soft whites and blues, relaxed tailoring with a seaside ease.',
+  'Minimalist':'Clean lines, restrained palette, and intentional pieces with zero excess.'
+};
 let aestheticIdx = 0;
 const wardrobe = { tops:[], bottoms:[], shoes:[], accs:[] };
 let savedCombos = [], lastCombos = [];
@@ -510,6 +596,109 @@ const COLOR_MAP = {
   Grey:'#6b7280',White:'#ffffff',Burgundy:'#8b4c3c',Olive:'#4a7c59',
   Camel:'#c4a882',Cobalt:'#1e3a5f'
 };
+
+// ── MODALS (Aesthetics + Inspiration) ──
+function openModal(id){ document.getElementById(id).classList.add('visible'); }
+function closeModal(id){ document.getElementById(id).classList.remove('visible'); }
+document.addEventListener('click', e => {
+  if (e.target.classList && e.target.classList.contains('modal-overlay')) {
+    e.target.classList.remove('visible');
+  }
+});
+
+function openAestheticsModal(e) {
+  e.preventDefault();
+  renderAestheticsGrid();
+  openModal('aestheticsModal');
+}
+function renderAestheticsGrid() {
+  const grid = document.getElementById('aestheticsGrid');
+  grid.innerHTML = aesthetics.map((aes,i) => `
+    <div class="aes-card${i===aestheticIdx?' active':''}" onclick="selectAesthetic(${i})">
+      <div class="aes-name">${aes}</div>
+      <div class="aes-desc">${aestheticDescriptions[aes]}</div>
+    </div>`).join('');
+}
+function selectAesthetic(i) {
+  aestheticIdx = i;
+  document.getElementById('aestheticName').textContent = aesthetics[i];
+  updateAnalysis();
+  renderAestheticsGrid();
+  showToast(`Aesthetic set: ${aesthetics[i]}`);
+  setTimeout(() => closeModal('aestheticsModal'), 350);
+}
+
+function openInspirationModal(e) {
+  e.preventDefault();
+  document.getElementById('inspAestheticLabel').textContent = aesthetics[aestheticIdx];
+  openModal('inspirationModal');
+}
+
+async function generateInspiration() {
+  if (!currentUser) return showToast('Please sign in first');
+  const t=wardrobe.tops.length, b=wardrobe.bottoms.length, s=wardrobe.shoes.length, a=wardrobe.accs.length;
+  const aes = aesthetics[aestheticIdx];
+  document.getElementById('inspAestheticLabel').textContent = aes;
+  const btn = document.getElementById('btnInspRefresh');
+  btn.disabled = true;
+  const body = document.getElementById('inspirationBody');
+  body.innerHTML = `<div class="insp-loading"><div class="loading-spinner"></div><div class="loading-text">AI is dreaming up looks…</div></div>`;
+
+  const colors=[...document.querySelectorAll('.color-swatch.selected')].map(e=>e.dataset.color);
+  const occasions=[...document.querySelectorAll('.occasion-chip.selected')].map(e=>e.textContent);
+  const hasWardrobe = (t+b+s+a) > 0;
+  const wardrobeLine = hasWardrobe
+    ? `The user's actual wardrobe: ${t} tops, ${b} bottoms, ${s} pairs of shoes, ${a} accessories.`
+    : `The user has not uploaded any wardrobe items yet — generate aspirational, general inspiration for this aesthetic instead.`;
+
+  const prompt = `You are a world-class fashion editor creating an inspiration board.
+Aesthetic: ${aes}
+${wardrobeLine}
+Preferred colors: ${colors.join(', ')||'none specified'}
+Occasions of interest: ${occasions.join(', ')||'general everyday'}
+
+Generate 5 distinct outfit/style ideas that embody the "${aes}" aesthetic. Each idea should be a short, evocative concept the user could actually shop for or recreate — not tied to specific wardrobe item numbers.
+
+Return ONLY a valid JSON array, no markdown, no backticks, no explanation:
+[{"name":"Short evocative title","occasion":"Work/Weekend/Evening/Travel/etc","desc":"2-3 sentence description of the look and why it works for this aesthetic","pieces":["key piece 1","key piece 2","key piece 3","key piece 4"]}]`;
+
+  try {
+    const raw = await callClaude([{role:'user', content: prompt}], 1400);
+    const ideas = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    renderInspiration(ideas);
+  } catch(e) {
+    console.warn('Inspiration generation failed:', e);
+    renderInspiration(buildInspirationFallback(aes));
+  }
+  btn.disabled = false;
+}
+
+function renderInspiration(ideas) {
+  const body = document.getElementById('inspirationBody');
+  if (!ideas || !ideas.length) {
+    body.innerHTML = `<div class="insp-empty">Couldn't generate ideas right now — try again.</div>`;
+    return;
+  }
+  body.innerHTML = ideas.map((idea,i) => `
+    <div class="insp-card" style="animation-delay:${i*0.08}s">
+      <div class="insp-card-head">
+        <div class="insp-card-name">${idea.name}</div>
+        ${idea.occasion?`<div class="insp-card-tag">${idea.occasion}</div>`:''}
+      </div>
+      <div class="insp-card-desc">${idea.desc}</div>
+      <div class="insp-card-pieces">${(idea.pieces||[]).map(p=>`<span class="insp-piece">${p}</span>`).join('')}</div>
+    </div>`).join('');
+}
+
+function buildInspirationFallback(aes) {
+  return [
+    {name:`The ${aes} Foundation`,occasion:'Everyday',desc:`A wardrobe built on neutral layering pieces that capture the essence of ${aes} without trying too hard.`,pieces:['Tailored trouser','Crisp shirt','Leather loafer','Structured bag']},
+    {name:'Texture Play',occasion:'Weekend',desc:'Mixing fabric weights and finishes keeps a simple palette visually rich and tactile.',pieces:['Knit layer','Wide-leg trouser','Suede shoe']},
+    {name:'Evening Edit',occasion:'Date Night',desc:'A slightly elevated version of the daytime formula — same bones, richer materials.',pieces:['Silk top','Tailored trouser','Heeled mule','Fine jewellery']},
+    {name:'Travel Capsule',occasion:'Travel',desc:'Wrinkle-resistant, mix-and-match pieces in a tight palette for effortless packing.',pieces:['Knit set','Trench coat','Sneaker']},
+    {name:'Statement Accent',occasion:'Work',desc:'One considered accessory or color pop against an otherwise quiet outfit.',pieces:['Blazer','Straight trouser','Colored bag']}
+  ];
+}
 
 // ── ANTHROPIC API HELPER ──
 // Adds the required header for direct browser calls
