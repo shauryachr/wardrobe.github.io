@@ -11,10 +11,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
          signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject, listAll }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";const db       = getFirestore(app, "images");
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey:            "AIzaSyDTkjqrZs1MSomIgHvGoiNpcUqU7B8xENE",
@@ -28,14 +26,12 @@ const firebaseConfig = {
 
 const app      = initializeApp(firebaseConfig);
 const auth     = getAuth(app);
-const storage  = getStorage(app);
-const db       = getFirestore(app);
+const db       = getFirestore(app, "images");
 const gProvider = new GoogleAuthProvider();
 
-window._fb = { auth, storage, db, gProvider,
+window._fb = { auth, db, gProvider,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   signInWithPopup, signOut, onAuthStateChanged,
-  ref, uploadBytes, getDownloadURL, deleteObject, listAll,
   doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove };
 
 console.log('✅ Firebase loaded OK');
@@ -843,19 +839,33 @@ async function saveWardrobeToFirestore() {
   await setDoc(doc(db,'wardrobes',currentUser.uid), data);
 }
 
-// ── STORAGE ──
+// ── STORAGE (Cloudinary — free tier, no card required) ──
+const CLOUDINARY_CLOUD_NAME = 'dyyqwckel';
+const CLOUDINARY_UPLOAD_PRESET = 'wardrobe_unsigned';
+
 async function uploadToStorage(file, cat) {
-  const { storage, ref, uploadBytes, getDownloadURL } = window._fb;
-  const path = `wardrobes/${currentUser.uid}/${cat}/${Date.now()}_${file.name}`;
-  const storageRef = ref(storage, path);
-  const snap = await uploadBytes(storageRef, file);
-  const url = await getDownloadURL(snap.ref);
-  return { url, storagePath: path };
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  formData.append('folder', `wardrobes/${currentUser.uid}/${cat}`);
+
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+    method: 'POST',
+    body: formData
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return { url: data.secure_url, storagePath: data.public_id };
 }
+
 async function deleteFromStorage(storagePath) {
-  if (!storagePath) return;
-  const { storage, ref, deleteObject } = window._fb;
-  try { await deleteObject(ref(storage, storagePath)); } catch {}
+  // Unsigned uploads can't be deleted directly from the browser (Cloudinary
+  // requires a signed request with your API secret for deletion, and that
+  // secret must never be exposed in client-side code). We simply remove the
+  // item from Firestore — the image stays in your Cloudinary library unused,
+  // which is fine within the free tier's storage quota. You can periodically
+  // clear unused images from the Cloudinary Media Library UI if needed.
+  return;
 }
 
 // ── DRAG & DROP ──
