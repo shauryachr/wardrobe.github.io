@@ -28,10 +28,28 @@
   .nav-links a { font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-decoration: none; font-weight: 500; transition: color 0.2s; }
   .nav-links a:hover { color: var(--ink); }
   .nav-actions { display: flex; gap: 1rem; align-items: center; }
-  .nav-login { font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-decoration: none; font-weight: 500; transition: color 0.2s; }
-  .nav-login:hover { color: var(--ink); }
   .nav-cta { font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.6rem 1.5rem; background: var(--ink); color: var(--cream); border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500; transition: background 0.2s; text-decoration: none; display: inline-block; }
   .nav-cta:hover { background: var(--gold); }
+
+  /* Hamburger — hidden on desktop */
+  .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; }
+  .nav-hamburger span { display: block; width: 22px; height: 1.5px; background: var(--ink); transition: all 0.25s; }
+  .nav-hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+  .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+  .nav-hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+  /* Mobile drawer */
+  .mobile-menu {
+    display: none; position: fixed; top: 64px; left: 0; right: 0; z-index: 99;
+    background: rgba(250,248,244,0.98); backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(184,150,90,0.2);
+    padding: 1.5rem 2rem 2rem; flex-direction: column; gap: 1.2rem;
+    transform: translateY(-8px); opacity: 0;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+  .mobile-menu.open { display: flex; transform: translateY(0); opacity: 1; }
+  .mobile-menu a { font-size: 0.82rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-decoration: none; font-weight: 500; padding: 0.5rem 0; border-bottom: 1px solid rgba(184,150,90,0.1); }
+  .mobile-menu a:last-child { border-bottom: none; color: var(--ink); font-weight: 600; margin-top: 0.5rem; }
 
   .hero { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; padding-top: 80px; }
   .hero-left { display: flex; flex-direction: column; justify-content: center; padding: 5rem 3rem 5rem 4rem; }
@@ -105,8 +123,91 @@
   .footer-copy { font-size: 0.72rem; color: rgba(245,240,232,0.3); }
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
   .animate { animation: fadeUp 0.7s ease both; }
   .delay-1 { animation-delay: 0.15s; } .delay-2 { animation-delay: 0.3s; } .delay-3 { animation-delay: 0.45s; } .delay-4 { animation-delay: 0.6s; }
+
+  /* ─── TABLET (≤900px) ─── */
+  @media (max-width: 900px) {
+    nav { padding: 1.1rem 2rem; }
+    .nav-links { display: none; }
+    .nav-hamburger { display: flex; }
+
+    .hero { grid-template-columns: 1fr; min-height: auto; padding-top: 64px; }
+    .hero-left { padding: 3.5rem 2rem 3rem; }
+    .hero-right { min-height: 360px; }
+    .clothes-grid { width: 84%; height: 90%; min-height: 300px; }
+
+    .section { padding: 4rem 2rem; }
+    .section-title { margin-bottom: 2.5rem; }
+    .steps { grid-template-columns: 1fr; gap: 1.2rem; }
+
+    .aesthetics-section { padding: 4rem 2rem; }
+    .aesthetics-grid { grid-template-columns: repeat(2, 1fr); }
+
+    .feature-strip { grid-template-columns: 1fr; gap: 3rem; padding: 4rem 2rem; }
+    .feature-preview { display: none; }
+
+    .cta-section { padding: 5rem 2rem; }
+
+    footer { padding: 2.5rem 2rem; flex-direction: column; gap: 1.5rem; text-align: center; }
+    .footer-links { justify-content: center; }
+  }
+
+  /* ─── MOBILE (≤600px) ─── */
+  @media (max-width: 600px) {
+    nav { padding: 1rem 1.25rem; }
+    .nav-logo { font-size: 1.2rem; }
+    .nav-cta { padding: 0.5rem 1rem; font-size: 0.72rem; }
+
+    .hero { padding-top: 62px; }
+    .hero-left { padding: 2.5rem 1.25rem 2rem; }
+    .hero-title { font-size: clamp(2.6rem, 11vw, 3.2rem); }
+    .hero-subtitle { font-size: 1.1rem; margin-bottom: 1.25rem; }
+    .hero-desc { font-size: 0.85rem; margin-bottom: 2rem; }
+    .hero-actions { flex-direction: column; align-items: stretch; gap: 0.9rem; }
+    .btn-primary { text-align: center; padding: 1rem 1.5rem; }
+    .btn-ghost { padding: 0.5rem 0; text-align: center; }
+
+    .hero-right { min-height: 260px; }
+    .clothes-grid { width: 90%; min-height: 240px; gap: 0.5rem; }
+    .cloth-icon { width: 44px; height: 44px; }
+    .cloth-card { padding: 0.85rem 0.6rem; }
+    .cloth-card-label { font-size: 0.58rem; margin-top: 0.4rem; }
+
+    .section { padding: 2.75rem 1.25rem; }
+    .section-title { font-size: clamp(1.9rem, 8vw, 2.4rem); margin-bottom: 1.75rem; }
+    .section-label { font-size: 0.65rem; }
+
+    .steps { gap: 0.9rem; }
+    .step { padding: 1.4rem 1.1rem; }
+    .step-num { font-size: 2.8rem; margin-bottom: 0.75rem; }
+    .step-title { font-size: 1.15rem; }
+    .step-desc { font-size: 0.8rem; }
+    .step-icon { width: 38px; height: 38px; margin-bottom: 0.9rem; }
+
+    .aesthetics-section { padding: 2.75rem 1.25rem; }
+    .aesthetics-grid { grid-template-columns: 1fr 1fr; }
+    .aesthetic-item { min-height: 140px; padding: 1.1rem 0.9rem; }
+    .aesthetic-swatch { height: 40px; margin-bottom: 0.75rem; }
+    .aesthetic-name { font-size: 0.95rem; }
+    .aesthetic-desc { font-size: 0.63rem; }
+
+    .feature-strip { padding: 2.75rem 1.25rem; gap: 2rem; }
+    .feature-strip .section-title { margin-bottom: 1.5rem; }
+    .feature-text { font-size: 0.82rem; }
+    .feature-list { gap: 1.2rem; }
+
+    .cta-section { padding: 3.5rem 1.25rem; }
+    .cta-title { font-size: clamp(2rem, 9vw, 2.8rem); }
+    .cta-bg-text { font-size: 30vw; }
+    .cta-desc { font-size: 0.85rem; margin-bottom: 2rem; }
+    .cta-actions { flex-direction: column; align-items: stretch; }
+    .btn-large { text-align: center; padding: 1rem 1.5rem; }
+
+    footer { padding: 2rem 1.25rem; gap: 1.2rem; }
+    .footer-copy { font-size: 0.65rem; }
+  }
 </style>
 </head>
 <body>
@@ -120,8 +221,18 @@
   </div>
   <div class="nav-actions">
     <a href="app.html" class="nav-cta">Try Free</a>
+    <button class="nav-hamburger" id="hamburger" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#how" onclick="closeMenu()">How It Works</a>
+  <a href="#aesthetics" onclick="closeMenu()">Aesthetics</a>
+  <a href="#features" onclick="closeMenu()">Features</a>
+  <a href="app.html">Try Free →</a>
+</div>
 
 <section class="hero">
   <div class="hero-left">
@@ -237,7 +348,7 @@
       <div class="feature-item"><div class="feature-dot"></div><div class="feature-text"><strong>Weekly Outfit Planner</strong> — Plan your entire week in one go. Never wear the same combo twice.</div></div>
     </div>
   </div>
-  <div style="background:var(--charcoal);border:1px solid rgba(184,150,90,0.2);padding:2rem;">
+  <div class="feature-preview" style="background:var(--charcoal);border:1px solid rgba(184,150,90,0.2);padding:2rem;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(184,150,90,0.15);">
       <span style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;">Virtual Wardrobe</span>
       <div style="display:flex;gap:5px;"><div style="width:8px;height:8px;border-radius:50%;background:rgba(184,150,90,0.6);"></div><div style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.15);"></div></div>
@@ -252,7 +363,6 @@
       <div style="width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 1.5s ease-in-out infinite;"></div>
       Quiet Luxury match — 94% aesthetic fit
     </div>
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
   </div>
 </section>
 
@@ -273,6 +383,30 @@
   </div>
   <div class="footer-copy">© 2026 Virtual Wardrobe</div>
 </footer>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+
+  hamburger.addEventListener('click', () => {
+    const open = hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+    hamburger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  });
+
+  function closeMenu() {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+    hamburger.setAttribute('aria-label', 'Open menu');
+  }
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!nav.contains(e.target) && !mobileMenu.contains(e.target)) closeMenu();
+  });
+
+  const nav = document.querySelector('nav');
+</script>
 
 </body>
 </html>
