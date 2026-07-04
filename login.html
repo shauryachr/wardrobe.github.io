@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — Virtual Wardrobe</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+         signInWithPopup, GoogleAuthProvider, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyDTkjqrZs1MSomIgHvGoiNpcUqU7B8xENE",
+  authDomain:        "virtual-wardrobe-ai.firebaseapp.com",
+  projectId:         "virtual-wardrobe-ai",
+  storageBucket:     "virtual-wardrobe-ai.firebasestorage.app",
+  messagingSenderId: "420036428823",
+  appId:             "1:420036428823:web:578e390e80ad85c39e8852",
+  measurementId:     "G-HFYD2RFSF3"
+};
+
+const app       = initializeApp(firebaseConfig);
+const auth      = getAuth(app);
+const db        = getFirestore(app, "images");
+const gProvider = new GoogleAuthProvider();
+
+window._fb = { auth, db, gProvider,
+  createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  signInWithPopup, onAuthStateChanged,
+  doc, setDoc };
+
+console.log('✅ Firebase loaded OK (login)');
+</script>
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#1a1510;--ink-soft:#211b14;--cream:#f5f0e8;--warm-white:#faf8f4;
+  --gold:#b8965a;--gold-light:#e8d5b0;--gold-dim:rgba(184,150,90,0.15);
+  --muted:#7a7165;--accent:#8b4c3c;
+  --border:rgba(184,150,90,0.14);--border-strong:rgba(184,150,90,0.35);
+  --err:#e07070;
+}
+html,body{height:100%}
+body{
+  font-family:'DM Sans',sans-serif;color:var(--ink);
+  display:flex;min-height:100vh;overflow-x:hidden;
+  background:var(--warm-white);
+}
+
+/* ══════════════ LEFT — BRAND PANEL ══════════════ */
+.brand-panel{
+  position:relative;
+  flex:0 0 44%;
+  background:var(--ink);
+  color:var(--cream);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:3rem 3.2rem;
+  overflow:hidden;
+}
+.brand-panel::before{
+  content:'';
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 0%, rgba(184,150,90,.10), transparent 60%),
+    radial-gradient(ellipse 50% 45% at 100% 100%, rgba(184,150,90,.07), transparent 60%);
+  pointer-events:none;
+}
+.brand-top{position:relative;z-index:1}
+.brand-logo{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:600;letter-spacing:.02em}
+.brand-logo span{color:var(--gold)}
+
+.brand-mid{position:relative;z-index:1;flex:1;display:flex;align-items:center;padding:2rem 0}
+.brand-art{width:100%;max-width:340px}
+.brand-art svg{width:100%;height:auto;display:block}
+.thread-line{
+  fill:none;stroke:var(--gold);stroke-width:1;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:1400;stroke-dashoffset:1400;
+  animation:draw 2.6s cubic-bezier(.65,0,.35,1) .2s forwards;
+}
+.thread-line.delay{animation-delay:.6s}
+.thread-dot{
+  fill:var(--gold-light);opacity:0;
+  animation:fadeInDot .6s ease .3s forwards;
+}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fadeInDot{to{opacity:1}}
+@media (prefers-reduced-motion:reduce){
+  .thread-line{animation:none;stroke-dashoffset:0}
+  .thread-dot{animation:none;opacity:1}
+}
+
+.brand-quote{position:relative;z-index:1}
+.brand-quote-mark{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:2.6rem;line-height:1.25;
+  color:var(--cream);font-weight:400;max-width:22ch;
+}
+.brand-quote-mark em{color:var(--gold);font-style:italic}
+.brand-quote-sub{
+  margin-top:1rem;font-size:.76rem;color:rgba(245,240,232,.4);
+  letter-spacing:.05em;line-height:1.7;max-width:34ch;font-weight:300;
+}
+
+.brand-bottom{position:relative;z-index:1;display:flex;gap:1.6rem;padding-top:1.6rem;border-top:1px solid rgba(184,150,90,.14)}
+.brand-stat-num{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--gold);font-weight:600}
+.brand-stat-label{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,240,232,.35);margin-top:.15rem}
+
+/* ══════════════ RIGHT — FORM PANEL ══════════════ */
+.form-panel{
+  flex:1;
+  display:flex;align-items:center;justify-content:center;
+  padding:2.5rem 1.5rem;
+  background:var(--warm-white);
+  position:relative;
+}
+.form-wrap{width:100%;max-width:380px;animation:riseIn .5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.mobile-logo{display:none;font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:var(--ink);text-align:center;margin-bottom:1.6rem;letter-spacing:.02em}
+.mobile-logo span{color:var(--gold)}
+
+.form-heading{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:600;margin-bottom:.35rem;letter-spacing:.01em}
+.form-heading em{font-style:italic;color:var(--accent)}
+.form-sub{font-size:.75rem;color:var(--muted);margin-bottom:1.8rem;font-weight:400}
+
+.auth-tabs{position:relative;display:flex;border-bottom:1px solid var(--border);margin-bottom:1.7rem}
+.auth-tab{
+  flex:1;padding:.55rem 0 .7rem;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;
+  text-align:center;cursor:pointer;color:var(--muted);background:none;border:none;
+  font-family:'DM Sans',sans-serif;font-weight:500;transition:color .2s;position:relative;z-index:1;
+}
+.auth-tab.active{color:var(--ink)}
+.auth-tab-indicator{
+  position:absolute;bottom:-1px;left:0;width:50%;height:2px;background:var(--gold);
+  transition:transform .3s cubic-bezier(.65,0,.35,1);
+}
+.auth-tab-indicator.reg{transform:translateX(100%)}
+
+.auth-err{
+  font-size:.72rem;color:var(--err);margin-bottom:1rem;min-height:0;text-align:left;
+  display:none;align-items:center;gap:.45rem;background:rgba(224,112,112,.08);
+  border:1px solid rgba(224,112,112,.25);padding:.55rem .7rem;
+}
+.auth-err.visible{display:flex}
+.auth-err::before{content:'⚠';font-size:.72rem;flex-shrink:0}
+
+.auth-field{margin-bottom:1.1rem;position:relative}
+.auth-field label{
+  display:block;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:.4rem;font-weight:500;
+}
+.auth-field input{
+  width:100%;padding:.68rem .8rem;background:var(--warm-white);
+  border:1px solid var(--border-strong);color:var(--ink);
+  font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;
+  transition:border-color .2s, box-shadow .2s;
+}
+.auth-field input::placeholder{color:rgba(122,113,101,.4)}
+.auth-field input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim)}
+
+.btn-auth{
+  width:100%;padding:.72rem;background:var(--ink);color:var(--cream);
+  font-family:'DM Sans',sans-serif;font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;
+  font-weight:500;border:none;cursor:pointer;margin-bottom:1rem;
+  transition:background .2s, transform .15s;position:relative;
+}
+.btn-auth:hover:not(:disabled){background:var(--gold)}
+.btn-auth:active:not(:disabled){transform:scale(.99)}
+.btn-auth:disabled{opacity:.5;cursor:not-allowed}
+
+.auth-sep{
+  display:flex;align-items:center;gap:.7rem;font-size:.6rem;color:var(--muted);
+  margin:1rem 0;letter-spacing:.1em;text-transform:uppercase;
+}
+.auth-sep::before,.auth-sep::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.btn-google{
+  width:100%;padding:.65rem;background:none;border:1px solid var(--border-strong);
+  color:var(--ink);font-family:'DM Sans',sans-serif;font-size:.72rem;letter-spacing:.06em;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem;
+  transition:border-color .2s, background .2s;
+}
+.btn-google:hover{border-color:var(--gold);background:var(--gold-dim)}
+
+.form-footer{margin-top:1.6rem;text-align:center;font-size:.72rem;color:var(--muted)}
+.form-footer button{
+  background:none;border:none;color:var(--gold);cursor:pointer;font-family:'DM Sans',sans-serif;
+  font-size:.72rem;font-weight:500;text-decoration:underline;text-underline-offset:2px;
+}
+
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeSlide .3s ease both}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══════════════ SESSION CHECK ══════════════ */
+#authChecking{
+  display:flex;flex-direction:column;align-items:center;gap:.9rem;padding:2rem 0;
+}
+.check-spinner{
+  width:26px;height:26px;border:1.5px solid var(--border);border-top-color:var(--gold);
+  border-radius:50%;animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.check-text{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+/* ══════════════ RESPONSIVE ══════════════ */
+@media (max-width:900px){
+  .brand-panel{display:none}
+  .mobile-logo{display:block}
+  .form-panel{padding:2.2rem 1.4rem;min-height:100vh}
+}
+@media (max-width:420px){
+  .form-heading{font-size:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<aside class="brand-panel">
+  <div class="brand-top">
+    <div class="brand-logo">Virtual<span>.</span>Wardrobe</div>
+  </div>
+
+  <div class="brand-mid">
+    <div class="brand-art">
+      <svg viewBox="0 0 320 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- hanger + garment, drawn as a single continuous gold thread -->
+        <path class="thread-line" d="M160 18 a10 10 0 1 1 -0.1 0 M160 28 L160 46 M110 46 L210 46 M160 46 L60 118 L60 232 Q60 242 70 242 L250 242 Q260 242 260 232 L260 118 L160 46" />
+        <path class="thread-line delay" d="M92 132 Q160 168 228 132 M100 176 L100 214 M160 190 L160 220 M220 176 L220 214" />
+        <circle class="thread-dot" cx="160" cy="18" r="3.5" />
+        <circle class="thread-dot" cx="60" cy="118" r="2.5" style="animation-delay:1.4s" />
+        <circle class="thread-dot" cx="260" cy="118" r="2.5" style="animation-delay:1.6s" />
+      </svg>
+    </div>
+  </div>
+
+  <div class="brand-quote">
+    <div class="brand-quote-mark">Every wardrobe tells you <em>who you're becoming.</em></div>
+    <div class="brand-quote-sub">Upload your pieces once — your AI stylist takes it from there, season after season.</div>
+  </div>
+
+  <div class="brand-bottom">
+    <div>
+      <div class="brand-stat-num">8</div>
+      <div class="brand-stat-label">Aesthetics</div>
+    </div>
+    <div>
+      <div class="brand-stat-num">∞</div>
+      <div class="brand-stat-label">Combinations</div>
+    </div>
+    <div>
+      <div class="brand-stat-num">24/7</div>
+      <div class="brand-stat-label">AI Stylist</div>
+    </div>
+  </div>
+</aside>
+
+<main class="form-panel">
+  <div class="form-wrap">
+    <div class="mobile-logo">Virtual<span>.</span>Wardrobe</div>
+
+    <div id="authChecking">
+      <div class="check-spinner"></div>
+      <div class="check-text">Checking session…</div>
+    </div>
+
+    <div id="authForms" style="display:none">
+      <div class="form-heading" id="formHeading">Welcome <em>back</em></div>
+      <div class="form-sub" id="formSub">Sign in to pick up where your wardrobe left off.</div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabBtnLogin" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="auth-tab" id="tabBtnRegister" onclick="switchAuthTab('register')">Create Account</button>
+        <div class="auth-tab-indicator" id="tabIndicator"></div>
+      </div>
+
+      <div id="authErr" class="auth-err"></div>
+
+      <div id="tabLogin" class="tab-panel active">
+        <div class="auth-field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email"></div>
+        <div class="auth-field"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')emailSignIn()"></div>
+        <button class="btn-auth" id="btnSignIn" onclick="emailSignIn()">Sign In</button>
+        <div class="auth-sep">or</div>
+        <button class="btn-google" onclick="googleSignIn()">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continue with Google
+        </button>
+        <div class="form-footer">New here? <button onclick="switchAuthTab('register')">Create an account</button></div>
+      </div>
+
+      <div id="tabRegister" class="tab-panel">
+        <div class="auth-field"><label>Display Name</label><input type="text" id="regName" placeholder="Alex Sharma" autocomplete="name"></div>
+        <div class="auth-field"><label>Email</label><input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email"></div>
+        <div class="auth-field"><label>Password</label><input type="password" id="regPass" placeholder="At least 6 characters" autocomplete="new-password" onkeydown="if(event.key==='Enter')emailRegister()"></div>
+        <button class="btn-auth" id="btnRegister" onclick="emailRegister()">Create Account</button>
+        <div class="auth-sep">or</div>
+        <button class="btn-google" onclick="googleSignIn()">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continue with Google
+        </button>
+        <div class="form-footer">Already have an account? <button onclick="switchAuthTab('login')">Sign in</button></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ── WAIT FOR FIREBASE ──
+function waitForFirebase(cb, tries=0) {
+  if (window._fb) return cb();
+  if (tries > 60) { showFormsWithErr('Firebase failed to initialise.'); return; }
+  setTimeout(() => waitForFirebase(cb, tries+1), 150);
+}
+function showFormsWithErr(msg) {
+  document.getElementById('authChecking').style.display = 'none';
+  document.getElementById('authForms').style.display = 'block';
+  setAuthErr(msg);
+}
+
+// ── AUTH TABS ──
+function switchAuthTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('tabBtnLogin').classList.toggle('active', isLogin);
+  document.getElementById('tabBtnRegister').classList.toggle('active', !isLogin);
+  document.getElementById('tabIndicator').classList.toggle('reg', !isLogin);
+  document.getElementById('tabLogin').classList.toggle('active', isLogin);
+  document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+  document.getElementById('formHeading').innerHTML = isLogin ? 'Welcome <em>back</em>' : 'Start your <em>wardrobe</em>';
+  document.getElementById('formSub').textContent = isLogin
+    ? "Sign in to pick up where your wardrobe left off."
+    : "Create an account — your pieces sync across every visit.";
+  setAuthErr('');
+}
+function setAuthErr(msg) {
+  const el = document.getElementById('authErr');
+  el.textContent = msg;
+  el.classList.toggle('visible', !!msg);
+}
+function setAuthLoading(loading) {
+  document.getElementById('btnSignIn').disabled = loading;
+  document.getElementById('btnRegister').disabled = loading;
+  document.getElementById('btnSignIn').textContent = loading ? 'Signing in…' : 'Sign In';
+  document.getElementById('btnRegister').textContent = loading ? 'Creating…' : 'Create Account';
+}
+
+// ── AUTH ACTIONS ──
+function emailSignIn() {
+  if (!window._fb) return setAuthErr('Still initialising — please wait.');
+  const { auth, signInWithEmailAndPassword } = window._fb;
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value;
+  if (!email||!pass) return setAuthErr('Fill in email and password.');
+  setAuthErr(''); setAuthLoading(true);
+  signInWithEmailAndPassword(auth, email, pass)
+    .then(() => { window.location.href = 'app.html'; })
+    .catch(e => { setAuthErr(friendlyErr(e.code)); setAuthLoading(false); });
+}
+function emailRegister() {
+  if (!window._fb) return setAuthErr('Still initialising — please wait.');
+  const { auth, db, createUserWithEmailAndPassword, doc, setDoc } = window._fb;
+  const name  = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass  = document.getElementById('regPass').value;
+  if (!name||!email||!pass) return setAuthErr('Fill in all fields.');
+  setAuthErr(''); setAuthLoading(true);
+  createUserWithEmailAndPassword(auth, email, pass)
+    .then(cred => setDoc(doc(db,'users',cred.user.uid), { name, email, createdAt: Date.now() }))
+    .then(() => { window.location.href = 'app.html'; })
+    .catch(e => { setAuthErr(friendlyErr(e.code)); setAuthLoading(false); });
+}
+function googleSignIn() {
+  if (!window._fb) return setAuthErr('Still initialising — please wait.');
+  const { auth, gProvider, signInWithPopup } = window._fb;
+  setAuthErr('');
+  signInWithPopup(auth, gProvider)
+    .then(() => { window.location.href = 'app.html'; })
+    .catch(e => setAuthErr(friendlyErr(e.code)));
+}
+function friendlyErr(code) {
+  const map = {
+    'auth/invalid-email':'Invalid email address.',
+    'auth/user-not-found':'No account found with this email.',
+    'auth/wrong-password':'Incorrect password.',
+    'auth/email-already-in-use':'Email already registered — try signing in.',
+    'auth/weak-password':'Password must be at least 6 characters.',
+    'auth/popup-closed-by-user':'Sign-in popup was closed.',
+    'auth/invalid-credential':'Email or password is incorrect.',
+    'auth/too-many-requests':'Too many attempts — wait and try again.',
+    'auth/network-request-failed':'Network error — check your connection.',
+  };
+  return map[code] || `Error (${code}). Please try again.`;
+}
+
+// ── AUTH STATE: if already signed in, skip straight to the app ──
+waitForFirebase(() => {
+  const { auth, onAuthStateChanged } = window._fb;
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      window.location.href = 'app.html';
+    } else {
+      document.getElementById('authChecking').style.display = 'none';
+      document.getElementById('authForms').style.display = 'block';
+    }
+  });
+});
+</script>
+</body>
+</html>
