@@ -14,6 +14,125 @@
   }
   html { scroll-behavior: smooth; }
   body { font-family: 'DM Sans', sans-serif; background: var(--warm-white); color: var(--ink); overflow-x: hidden; }
+  body.intro-lock { overflow: hidden; height: 100vh; }
+
+  /* ══════════════ WARDROBE INTRO ══════════════ */
+  #wardrobe-intro {
+    position: fixed; inset: 0; z-index: 9999;
+    perspective: 2400px; perspective-origin: 50% 50%;
+    background: var(--ink);
+  }
+  #wardrobe-intro.intro-hidden { display: none; }
+
+  .intro-glow {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 55% at 50% 50%, rgba(184,150,90,0.35), transparent 70%);
+    opacity: 0; transition: opacity 1.1s ease;
+    pointer-events: none;
+  }
+  #wardrobe-intro.opening .intro-glow { opacity: 1; }
+
+  .intro-content {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5; text-align: center;
+    opacity: 1; transition: opacity 0.5s ease;
+  }
+  #wardrobe-intro.opening .intro-content { opacity: 0; }
+
+  .intro-hanger {
+    width: 46px; height: 46px; margin: 0 auto 1.25rem;
+    transform-origin: 50% 8%;
+    animation: hangerSwing 2.2s ease-in-out infinite;
+  }
+  @keyframes hangerSwing {
+    0%, 100% { transform: rotate(-7deg); }
+    50% { transform: rotate(7deg); }
+  }
+
+  .intro-wordmark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem; font-weight: 500; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--cream);
+    margin-bottom: 1.1rem;
+  }
+  .intro-wordmark span { color: var(--gold); }
+
+  .intro-loader {
+    width: 160px; height: 1px; background: rgba(245,240,232,0.15);
+    margin: 0 auto; position: relative; overflow: hidden;
+  }
+  .intro-loader::after {
+    content: ''; position: absolute; top: 0; left: 0; height: 100%;
+    width: 0%; background: var(--gold);
+    animation: loaderFill 1.7s cubic-bezier(.6,0,.4,1) forwards;
+  }
+  @keyframes loaderFill { to { width: 100%; } }
+
+  .intro-caption {
+    margin-top: 0.9rem; font-size: 0.62rem; letter-spacing: 0.24em;
+    text-transform: uppercase; color: rgba(245,240,232,0.4); font-weight: 500;
+  }
+
+  /* Doors */
+  .wardrobe-door {
+    position: absolute; top: 0; width: 50%; height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 1.35s cubic-bezier(.76,0,.15,1), box-shadow 1.35s ease;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.03), transparent 12%, transparent 88%, rgba(0,0,0,0.25)),
+      repeating-linear-gradient(90deg, rgba(245,240,232,0.02) 0px, rgba(245,240,232,0.02) 1px, transparent 1px, transparent 42px),
+      linear-gradient(135deg, #2a231b, #1a1510 55%, #120e0a);
+  }
+  .wardrobe-door::before {
+    /* recessed panel detail */
+    content: ''; position: absolute; top: 8%; bottom: 8%; left: 12%; right: 12%;
+    border: 1px solid rgba(184,150,90,0.28);
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(245,240,232,0.03);
+  }
+  .wardrobe-door::after {
+    /* subtle vertical sheen */
+    content: ''; position: absolute; top: 0; bottom: 0; width: 30%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  }
+  .wardrobe-door.left { left: 0; transform-origin: 0% 50%; border-right: 1px solid rgba(184,150,90,0.4); }
+  .wardrobe-door.left::after { right: 8%; }
+  .wardrobe-door.right { right: 0; transform-origin: 100% 50%; border-left: 1px solid rgba(184,150,90,0.4); }
+  .wardrobe-door.right::after { left: 8%; }
+
+  .door-handle {
+    position: absolute; top: 50%; width: 5px; height: 90px;
+    transform: translateY(-50%);
+    background: linear-gradient(180deg, var(--gold-light), var(--gold) 40%, #8a6c3d);
+    border-radius: 3px;
+    box-shadow: 0 0 14px rgba(184,150,90,0.5);
+  }
+  .wardrobe-door.left .door-handle { right: 6%; }
+  .wardrobe-door.right .door-handle { left: 6%; }
+
+  #wardrobe-intro.opening .wardrobe-door.left {
+    transform: rotateY(-112deg);
+    box-shadow: 40px 0 80px rgba(0,0,0,0.6);
+  }
+  #wardrobe-intro.opening .wardrobe-door.right {
+    transform: rotateY(112deg);
+    box-shadow: -40px 0 80px rgba(0,0,0,0.6);
+  }
+
+  #wardrobe-intro.closing-out { opacity: 0; transition: opacity 0.6s ease 0.15s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    #wardrobe-intro { display: none !important; }
+    body.intro-lock { overflow: visible; height: auto; }
+  }
+
+  @media (max-width: 600px) {
+    .intro-hanger { width: 36px; height: 36px; }
+    .intro-wordmark { font-size: 1.25rem; }
+    .intro-loader { width: 120px; }
+    .door-handle { height: 64px; }
+  }
+  /* ══════════════ END WARDROBE INTRO ══════════════ */
 
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
@@ -210,7 +329,28 @@
   }
 </style>
 </head>
-<body>
+<body class="intro-lock">
+
+<!-- ══════════════ WARDROBE OPENING INTRO ══════════════ -->
+<div id="wardrobe-intro" aria-hidden="true">
+  <div class="intro-glow"></div>
+
+  <div class="intro-content">
+    <svg class="intro-hanger" viewBox="0 0 46 46" fill="none">
+      <circle cx="23" cy="7" r="3.2" stroke="#b8965a" stroke-width="1.3"/>
+      <path d="M23 10 L23 15" stroke="#b8965a" stroke-width="1.3"/>
+      <path d="M23 15 C10 15 6 27 23 30 C40 27 36 15 23 15 Z" stroke="#b8965a" stroke-width="1.3"/>
+      <path d="M14 30 L32 30" stroke="#b8965a" stroke-width="1.3"/>
+    </svg>
+    <div class="intro-wordmark">Virtual<span>.</span>Wardrobe</div>
+    <div class="intro-loader"></div>
+    <div class="intro-caption">Opening your wardrobe</div>
+  </div>
+
+  <div class="wardrobe-door left"><div class="door-handle"></div></div>
+  <div class="wardrobe-door right"><div class="door-handle"></div></div>
+</div>
+<!-- ══════════════ END INTRO ══════════════ -->
 
 <nav>
   <a href="index.html" class="nav-logo">Virtual<span>.</span>Wardrobe</a>
@@ -406,6 +546,47 @@
   });
 
   const nav = document.querySelector('nav');
+
+  /* ══════════════ WARDROBE INTRO CONTROLLER ══════════════ */
+  (function () {
+    const intro = document.getElementById('wardrobe-intro');
+    const body = document.body;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function finishIntro() {
+      intro.classList.add('closing-out');
+      body.classList.remove('intro-lock');
+      setTimeout(() => intro.classList.add('intro-hidden'), 650);
+    }
+
+    if (reduceMotion || !intro) {
+      if (intro) intro.classList.add('intro-hidden');
+      body.classList.remove('intro-lock');
+      return;
+    }
+
+    // Hold on the loading state briefly, then swing the doors open.
+    const OPEN_AT = 1650;      // ms before doors start opening
+    const CLOSE_AFTER = 1450;  // ms for the door swing itself, then fade overlay
+
+    const openTimer = setTimeout(() => {
+      intro.classList.add('opening');
+      setTimeout(finishIntro, CLOSE_AFTER);
+    }, OPEN_AT);
+
+    // Let an impatient visitor skip straight in with a click or key press.
+    function skipIntro() {
+      clearTimeout(openTimer);
+      if (!intro.classList.contains('opening')) {
+        intro.classList.add('opening');
+        setTimeout(finishIntro, CLOSE_AFTER);
+      }
+      window.removeEventListener('click', skipIntro);
+      window.removeEventListener('keydown', skipIntro);
+    }
+    window.addEventListener('click', skipIntro, { once: true });
+    window.addEventListener('keydown', skipIntro, { once: true });
+  })();
 </script>
 
 </body>
