@@ -8,8 +8,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-         signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged }
+import { getAuth, signOut, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -24,17 +23,15 @@ const firebaseConfig = {
   measurementId:     "G-HFYD2RFSF3"
 };
 
-const app      = initializeApp(firebaseConfig);
-const auth     = getAuth(app);
-const db       = getFirestore(app, "images");
-const gProvider = new GoogleAuthProvider();
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app, "images");
 
-window._fb = { auth, db, gProvider,
-  createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  signInWithPopup, signOut, onAuthStateChanged,
+window._fb = { auth, db,
+  signOut, onAuthStateChanged,
   doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove };
 
-console.log('✅ Firebase loaded OK');
+console.log('✅ Firebase loaded OK (app)');
 </script>
 
 <style>
@@ -49,24 +46,10 @@ console.log('✅ Firebase loaded OK');
 }
 body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--ink);height:100vh;display:flex;overflow:hidden}
 
-/* AUTH SCREEN */
-#authScreen{position:fixed;inset:0;background:var(--sidebar);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:0}
-.auth-box{width:360px;padding:2.4rem 2.2rem;background:#201d18;border:1px solid var(--border-strong)}
-.auth-logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--cream);text-align:center;margin-bottom:1.8rem;letter-spacing:.02em}
-.auth-logo span{color:var(--gold)}
-.auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:1.6rem}
-.auth-tab{flex:1;padding:.5rem;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;text-align:center;cursor:pointer;color:rgba(245,240,232,.35);background:none;border:none;font-family:'DM Sans',sans-serif;transition:color .2s;border-bottom:2px solid transparent;margin-bottom:-1px}
-.auth-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
-.auth-field{margin-bottom:.9rem}
-.auth-field label{display:block;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,240,232,.35);margin-bottom:.35rem}
-.auth-field input{width:100%;padding:.55rem .75rem;background:rgba(255,255,255,.04);border:1px solid rgba(184,150,90,.18);color:var(--cream);font-family:'DM Sans',sans-serif;font-size:.8rem;outline:none;transition:border-color .2s}
-.auth-field input:focus{border-color:var(--gold)}
-.btn-auth{width:100%;padding:.6rem;background:var(--gold);color:var(--cream);font-family:'DM Sans',sans-serif;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;font-weight:500;border:none;cursor:pointer;margin-bottom:.75rem;transition:opacity .2s}
-.btn-auth:hover{opacity:.88}
-.btn-google{width:100%;padding:.55rem;background:none;border:1px solid rgba(255,255,255,.12);color:rgba(245,240,232,.6);font-family:'DM Sans',sans-serif;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.55rem;transition:border-color .2s}
-.btn-google:hover{border-color:var(--gold);color:var(--cream)}
-.auth-sep{text-align:center;font-size:.62rem;color:rgba(245,240,232,.2);margin:.65rem 0;letter-spacing:.1em;text-transform:uppercase}
-.auth-err{font-size:.68rem;color:#e07070;margin-bottom:.7rem;min-height:1rem;text-align:center}
+/* SESSION CHECK SCREEN (shown briefly while Firebase resolves auth state) */
+#sessionCheck{position:fixed;inset:0;background:var(--sidebar);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:.9rem}
+#sessionCheck .loading-spinner{width:28px;height:28px;border:1.5px solid rgba(184,150,90,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+#sessionCheck .session-text{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,240,232,.4);font-family:'DM Sans',sans-serif}
 
 /* APP */
 #appScreen{display:none;width:100%;height:100vh;overflow:hidden;flex-direction:row}
@@ -365,9 +348,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
   .modal-box{max-width:100%;width:100%;height:100%;max-height:100%;border:none}
   .aesthetics-grid{grid-template-columns:1fr}
 
-  /* ----- Auth screen ----- */
-  .auth-box{width:100%;max-width:360px;margin:0 1rem;padding:2rem 1.4rem}
-
   /* ----- Toast ----- */
   .toast{left:1rem;right:1rem;bottom:64px;text-align:center}
 
@@ -384,36 +364,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
 </head>
 <body>
 
-<div id="authScreen">
-  <div class="auth-box">
-    <div class="auth-logo">Virtual<span>.</span>Wardrobe</div>
-    <div class="auth-tabs">
-      <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
-      <button class="auth-tab" onclick="switchAuthTab('register')">Create Account</button>
-    </div>
-    <div id="authErr" class="auth-err"></div>
-    <div id="tabLogin">
-      <div class="auth-field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@example.com"></div>
-      <div class="auth-field"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••"></div>
-      <button class="btn-auth" id="btnSignIn" onclick="emailSignIn()">Sign In</button>
-      <div class="auth-sep">or</div>
-      <button class="btn-google" onclick="googleSignIn()">
-        <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-        Continue with Google
-      </button>
-    </div>
-    <div id="tabRegister" style="display:none">
-      <div class="auth-field"><label>Display Name</label><input type="text" id="regName" placeholder="Alex Sharma"></div>
-      <div class="auth-field"><label>Email</label><input type="email" id="regEmail" placeholder="you@example.com"></div>
-      <div class="auth-field"><label>Password</label><input type="password" id="regPass" placeholder="At least 6 characters"></div>
-      <button class="btn-auth" id="btnRegister" onclick="emailRegister()">Create Account</button>
-      <div class="auth-sep">or</div>
-      <button class="btn-google" onclick="googleSignIn()">
-        <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-        Continue with Google
-      </button>
-    </div>
-  </div>
+<div id="sessionCheck">
+  <div class="loading-spinner"></div>
+  <div class="session-text">Checking session…</div>
 </div>
 
 <div id="appScreen">
@@ -689,7 +642,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm-white);color:var(--i
 // ── WAIT FOR FIREBASE ──
 function waitForFirebase(cb, tries=0) {
   if (window._fb) return cb();
-  if (tries > 60) { setAuthErr('Firebase failed to initialise.'); return; }
+  if (tries > 60) { console.error('Firebase failed to initialise.'); return; }
   setTimeout(() => waitForFirebase(cb, tries+1), 150);
 }
 
@@ -859,81 +812,13 @@ async function callClaude(messages, maxTokens = 1000) {
   return (data.content || []).map(c => c.text || '').join('').trim();
 }
 
-// ── AUTH TABS ──
-function switchAuthTab(tab) {
-  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
-  document.getElementById('tabLogin').style.display = tab==='login'?'':'none';
-  document.getElementById('tabRegister').style.display = tab==='register'?'':'none';
-  document.getElementById('authErr').textContent = '';
-}
-function setAuthErr(msg) { document.getElementById('authErr').textContent = msg; }
-function setAuthLoading(loading) {
-  document.getElementById('btnSignIn').disabled = loading;
-  document.getElementById('btnRegister').disabled = loading;
-  document.getElementById('btnSignIn').textContent = loading ? 'Signing in…' : 'Sign In';
-  document.getElementById('btnRegister').textContent = loading ? 'Creating…' : 'Create Account';
-}
-
-// ── AUTH ACTIONS ──
-function emailSignIn() {
-  if (!window._fb) return setAuthErr('Still initialising — please wait.');
-  const { auth, signInWithEmailAndPassword } = window._fb;
-  const email = document.getElementById('loginEmail').value.trim();
-  const pass  = document.getElementById('loginPass').value;
-  if (!email||!pass) return setAuthErr('Fill in email and password.');
-  setAuthErr(''); setAuthLoading(true);
-  signInWithEmailAndPassword(auth, email, pass)
-    .catch(e => { setAuthErr(friendlyErr(e.code)); setAuthLoading(false); });
-}
-function emailRegister() {
-  if (!window._fb) return setAuthErr('Still initialising — please wait.');
-  const { auth, db, createUserWithEmailAndPassword, doc, setDoc } = window._fb;
-  const name  = document.getElementById('regName').value.trim();
-  const email = document.getElementById('regEmail').value.trim();
-  const pass  = document.getElementById('regPass').value;
-  if (!name||!email||!pass) return setAuthErr('Fill in all fields.');
-  setAuthErr(''); setAuthLoading(true);
-  createUserWithEmailAndPassword(auth, email, pass)
-    .then(cred => setDoc(doc(db,'users',cred.user.uid), { name, email, createdAt: Date.now() }))
-    .catch(e => { setAuthErr(friendlyErr(e.code)); setAuthLoading(false); });
-}
-function googleSignIn() {
-  if (!window._fb) return setAuthErr('Still initialising — please wait.');
-  const { auth, gProvider, signInWithPopup } = window._fb;
-  setAuthErr('');
-  signInWithPopup(auth, gProvider).catch(e => setAuthErr(friendlyErr(e.code)));
-}
-function doSignOut() {
-  window._fb.signOut(window._fb.auth).then(() => {
-    wardrobe.tops=[]; wardrobe.bottoms=[]; wardrobe.shoes=[]; wardrobe.accs=[];
-    savedCombos=[]; lastCombos=[];
-    ['tops','bottoms','shoes','accs'].forEach(c => { renderGrid(c); updateCount(c); });
-    document.getElementById('outfitDisplay').innerHTML = '<div class="empty-state"><p>Signed out. Sign in to continue.</p></div>';
-  });
-}
-function friendlyErr(code) {
-  const map = {
-    'auth/invalid-email':'Invalid email address.',
-    'auth/user-not-found':'No account found with this email.',
-    'auth/wrong-password':'Incorrect password.',
-    'auth/email-already-in-use':'Email already registered — try signing in.',
-    'auth/weak-password':'Password must be at least 6 characters.',
-    'auth/popup-closed-by-user':'Sign-in popup was closed.',
-    'auth/invalid-credential':'Email or password is incorrect.',
-    'auth/too-many-requests':'Too many attempts — wait and try again.',
-    'auth/network-request-failed':'Network error — check your connection.',
-  };
-  return map[code] || `Error (${code}). Please try again.`;
-}
-
-// ── AUTH STATE ──
+// ── AUTH STATE: redirect to login.html if not signed in ──
 waitForFirebase(() => {
   const { auth, onAuthStateChanged } = window._fb;
   onAuthStateChanged(auth, async user => {
-    setAuthLoading(false);
     if (user) {
       currentUser = user;
-      document.getElementById('authScreen').style.display = 'none';
+      document.getElementById('sessionCheck').style.display = 'none';
       document.getElementById('appScreen').classList.add('visible');
       const name = user.displayName || (await getUserName(user.uid)) || user.email.split('@')[0];
       document.getElementById('sidebarName').textContent = name;
@@ -942,9 +827,7 @@ waitForFirebase(() => {
       else av.textContent = name.charAt(0).toUpperCase();
       await loadWardrobe();
     } else {
-      currentUser = null;
-      document.getElementById('authScreen').style.display = 'flex';
-      document.getElementById('appScreen').classList.remove('visible');
+      window.location.href = 'login.html';
     }
   });
 });
@@ -955,6 +838,12 @@ async function getUserName(uid) {
     const snap = await getDoc(doc(db,'users',uid));
     return snap.exists() ? snap.data().name : null;
   } catch { return null; }
+}
+
+function doSignOut() {
+  window._fb.signOut(window._fb.auth).then(() => {
+    window.location.href = 'login.html';
+  });
 }
 
 // ── FIRESTORE ──
