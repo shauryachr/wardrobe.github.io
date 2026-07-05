@@ -9,7 +9,8 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-         signInWithPopup, GoogleAuthProvider, onAuthStateChanged }
+         signInWithPopup, GoogleAuthProvider, onAuthStateChanged,
+         RecaptchaVerifier, signInWithPhoneNumber, getAdditionalUserInfo }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, setDoc }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -32,6 +33,7 @@ const gProvider = new GoogleAuthProvider();
 window._fb = { auth, db, gProvider,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   signInWithPopup, onAuthStateChanged,
+  RecaptchaVerifier, signInWithPhoneNumber, getAdditionalUserInfo,
   doc, setDoc };
 
 console.log('✅ Firebase loaded OK (login)');
@@ -132,16 +134,15 @@ body{
 
 .auth-tabs{position:relative;display:flex;border-bottom:1px solid var(--border);margin-bottom:1.7rem}
 .auth-tab{
-  flex:1;padding:.55rem 0 .7rem;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;
+  flex:1;padding:.55rem 0 .7rem;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;
   text-align:center;cursor:pointer;color:var(--muted);background:none;border:none;
   font-family:'DM Sans',sans-serif;font-weight:500;transition:color .2s;position:relative;z-index:1;
 }
 .auth-tab.active{color:var(--ink)}
 .auth-tab-indicator{
-  position:absolute;bottom:-1px;left:0;width:50%;height:2px;background:var(--gold);
+  position:absolute;bottom:-1px;left:0;width:33.333%;height:2px;background:var(--gold);
   transition:transform .3s cubic-bezier(.65,0,.35,1);
 }
-.auth-tab-indicator.reg{transform:translateX(100%)}
 
 .auth-err{
   font-size:.72rem;color:var(--err);margin-bottom:1rem;min-height:0;text-align:left;
@@ -156,14 +157,20 @@ body{
   display:block;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;
   color:var(--muted);margin-bottom:.4rem;font-weight:500;
 }
-.auth-field input{
+.auth-field input,.auth-field select{
   width:100%;padding:.68rem .8rem;background:var(--warm-white);
   border:1px solid var(--border-strong);color:var(--ink);
   font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;
   transition:border-color .2s, box-shadow .2s;
 }
 .auth-field input::placeholder{color:rgba(122,113,101,.4)}
-.auth-field input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim)}
+.auth-field input:focus,.auth-field select:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim)}
+.phone-row{display:flex;gap:.5rem}
+.phone-row select{flex:0 0 82px;cursor:pointer}
+.phone-row input{flex:1}
+.otp-hint{font-size:.7rem;color:var(--muted);margin-bottom:1rem;line-height:1.6}
+.otp-hint strong{color:var(--ink);font-weight:500}
+.otp-code-input{letter-spacing:.35em;font-size:1rem !important;text-align:center}
 
 .btn-auth{
   width:100%;padding:.72rem;background:var(--ink);color:var(--cream);
@@ -174,6 +181,14 @@ body{
 .btn-auth:hover:not(:disabled){background:var(--gold)}
 .btn-auth:active:not(:disabled){transform:scale(.99)}
 .btn-auth:disabled{opacity:.5;cursor:not-allowed}
+.btn-auth-secondary{
+  width:100%;padding:.6rem;background:none;color:var(--muted);
+  font-family:'DM Sans',sans-serif;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;
+  font-weight:500;border:1px solid var(--border);cursor:pointer;margin-bottom:1rem;
+  transition:border-color .2s, color .2s;
+}
+.btn-auth-secondary:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+.btn-auth-secondary:disabled{opacity:.5;cursor:not-allowed}
 
 .auth-sep{
   display:flex;align-items:center;gap:.7rem;font-size:.6rem;color:var(--muted);
@@ -194,6 +209,12 @@ body{
   background:none;border:none;color:var(--gold);cursor:pointer;font-family:'DM Sans',sans-serif;
   font-size:.72rem;font-weight:500;text-decoration:underline;text-underline-offset:2px;
 }
+.form-footer-row{display:flex;justify-content:center;gap:.6rem;margin-top:.6rem;font-size:.7rem;color:var(--muted)}
+.form-footer-row button{
+  background:none;border:none;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;
+  font-size:.7rem;text-decoration:underline;text-underline-offset:2px;
+}
+.form-footer-row button:hover{color:var(--gold)}
 
 .tab-panel{display:none}
 .tab-panel.active{display:block;animation:fadeSlide .3s ease both}
@@ -278,6 +299,7 @@ body{
       <div class="auth-tabs">
         <button class="auth-tab active" id="tabBtnLogin" onclick="switchAuthTab('login')">Sign In</button>
         <button class="auth-tab" id="tabBtnRegister" onclick="switchAuthTab('register')">Create Account</button>
+        <button class="auth-tab" id="tabBtnPhone" onclick="switchAuthTab('phone')">Phone</button>
         <div class="auth-tab-indicator" id="tabIndicator"></div>
       </div>
 
@@ -292,6 +314,9 @@ body{
           <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
           Continue with Google
         </button>
+        <div class="form-footer-row">
+          <button onclick="switchAuthTab('phone')">Use phone number instead</button>
+        </div>
         <div class="form-footer">New here? <button onclick="switchAuthTab('register')">Create an account</button></div>
       </div>
 
@@ -305,11 +330,55 @@ body{
           <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
           Continue with Google
         </button>
+        <div class="form-footer-row">
+          <button onclick="switchAuthTab('phone')">Use phone number instead</button>
+        </div>
         <div class="form-footer">Already have an account? <button onclick="switchAuthTab('login')">Sign in</button></div>
+      </div>
+
+      <div id="tabPhone" class="tab-panel">
+        <div id="phoneStep1">
+          <div class="auth-field">
+            <label>Phone Number</label>
+            <div class="phone-row">
+              <select id="countryCode">
+                <option value="+91" selected>+91</option>
+                <option value="+1">+1</option>
+                <option value="+44">+44</option>
+                <option value="+61">+61</option>
+                <option value="+971">+971</option>
+                <option value="+65">+65</option>
+                <option value="+49">+49</option>
+                <option value="+33">+33</option>
+              </select>
+              <input type="tel" id="phoneNumber" placeholder="98765 43210" inputmode="tel" autocomplete="tel" onkeydown="if(event.key==='Enter')sendOtp()">
+            </div>
+          </div>
+          <button class="btn-auth" id="btnSendOtp" onclick="sendOtp()">Send OTP</button>
+          <div class="form-footer">Prefer email? <button onclick="switchAuthTab('login')">Sign in with email</button></div>
+        </div>
+
+        <div id="phoneStep2" style="display:none">
+          <div class="otp-hint" id="otpSentTo">Enter the 6-digit code we sent you.</div>
+          <div class="auth-field">
+            <label>Verification Code</label>
+            <input type="text" id="otpCode" class="otp-code-input" inputmode="numeric" maxlength="6" placeholder="••••••" onkeydown="if(event.key==='Enter')verifyOtp()">
+          </div>
+          <div class="auth-field" id="phoneNameField">
+            <label>Display Name <span style="text-transform:none;letter-spacing:0">(new accounts only)</span></label>
+            <input type="text" id="phoneName" placeholder="Alex Sharma" autocomplete="name">
+          </div>
+          <button class="btn-auth" id="btnVerifyOtp" onclick="verifyOtp()">Verify & Continue</button>
+          <button class="btn-auth-secondary" id="btnResendOtp" onclick="resendOtp()">Resend Code</button>
+          <div class="form-footer"><button onclick="changeNumber()">Change phone number</button></div>
+        </div>
       </div>
     </div>
   </div>
 </main>
+
+<!-- Invisible reCAPTCHA anchor required by Firebase Phone Auth -->
+<div id="recaptcha-container"></div>
 
 <script>
 // ── WAIT FOR FIREBASE ──
@@ -325,17 +394,27 @@ function showFormsWithErr(msg) {
 }
 
 // ── AUTH TABS ──
+const TAB_ORDER = ['login','register','phone'];
 function switchAuthTab(tab) {
-  const isLogin = tab === 'login';
-  document.getElementById('tabBtnLogin').classList.toggle('active', isLogin);
-  document.getElementById('tabBtnRegister').classList.toggle('active', !isLogin);
-  document.getElementById('tabIndicator').classList.toggle('reg', !isLogin);
-  document.getElementById('tabLogin').classList.toggle('active', isLogin);
-  document.getElementById('tabRegister').classList.toggle('active', !isLogin);
-  document.getElementById('formHeading').innerHTML = isLogin ? 'Welcome <em>back</em>' : 'Start your <em>wardrobe</em>';
-  document.getElementById('formSub').textContent = isLogin
-    ? "Sign in to pick up where your wardrobe left off."
-    : "Create an account — your pieces sync across every visit.";
+  const idx = TAB_ORDER.indexOf(tab);
+  document.getElementById('tabBtnLogin').classList.toggle('active', tab==='login');
+  document.getElementById('tabBtnRegister').classList.toggle('active', tab==='register');
+  document.getElementById('tabBtnPhone').classList.toggle('active', tab==='phone');
+  document.getElementById('tabIndicator').style.transform = `translateX(${idx*100}%)`;
+  document.getElementById('tabLogin').classList.toggle('active', tab==='login');
+  document.getElementById('tabRegister').classList.toggle('active', tab==='register');
+  document.getElementById('tabPhone').classList.toggle('active', tab==='phone');
+
+  if (tab==='login') {
+    document.getElementById('formHeading').innerHTML = 'Welcome <em>back</em>';
+    document.getElementById('formSub').textContent = "Sign in to pick up where your wardrobe left off.";
+  } else if (tab==='register') {
+    document.getElementById('formHeading').innerHTML = 'Start your <em>wardrobe</em>';
+    document.getElementById('formSub').textContent = "Create an account — your pieces sync across every visit.";
+  } else {
+    document.getElementById('formHeading').innerHTML = 'Sign in with <em>phone</em>';
+    document.getElementById('formSub').textContent = "We'll text you a one-time code — no password needed.";
+  }
   setAuthErr('');
 }
 function setAuthErr(msg) {
@@ -350,7 +429,7 @@ function setAuthLoading(loading) {
   document.getElementById('btnRegister').textContent = loading ? 'Creating…' : 'Create Account';
 }
 
-// ── AUTH ACTIONS ──
+// ── AUTH ACTIONS (email / google) ──
 function emailSignIn() {
   if (!window._fb) return setAuthErr('Still initialising — please wait.');
   const { auth, signInWithEmailAndPassword } = window._fb;
@@ -383,6 +462,94 @@ function googleSignIn() {
     .then(() => { window.location.href = 'app.html'; })
     .catch(e => setAuthErr(friendlyErr(e.code)));
 }
+
+// ── AUTH ACTIONS (phone / OTP) ──
+let recaptchaVerifier = null;
+let confirmationResult = null;
+
+function ensureRecaptcha() {
+  if (recaptchaVerifier) return recaptchaVerifier;
+  const { auth, RecaptchaVerifier } = window._fb;
+  recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' });
+  return recaptchaVerifier;
+}
+
+function setSendOtpLoading(loading) {
+  const btn = document.getElementById('btnSendOtp');
+  btn.disabled = loading;
+  btn.textContent = loading ? 'Sending…' : 'Send OTP';
+}
+function setVerifyLoading(loading) {
+  const btn = document.getElementById('btnVerifyOtp');
+  btn.disabled = loading;
+  btn.textContent = loading ? 'Verifying…' : 'Verify & Continue';
+}
+
+async function sendOtp() {
+  if (!window._fb) return setAuthErr('Still initialising — please wait.');
+  const { auth, signInWithPhoneNumber } = window._fb;
+  const code = document.getElementById('countryCode').value;
+  const rawNum = document.getElementById('phoneNumber').value.trim().replace(/[^\d]/g,'');
+  if (!rawNum || rawNum.length < 6) return setAuthErr('Enter a valid phone number.');
+  const fullNumber = code + rawNum;
+
+  setAuthErr('');
+  setSendOtpLoading(true);
+  try {
+    const verifier = ensureRecaptcha();
+    confirmationResult = await signInWithPhoneNumber(auth, fullNumber, verifier);
+    document.getElementById('phoneStep1').style.display = 'none';
+    document.getElementById('phoneStep2').style.display = 'block';
+    document.getElementById('otpSentTo').innerHTML = `Code sent to <strong>${fullNumber}</strong>. It can take up to a minute to arrive.`;
+    document.getElementById('otpCode').focus();
+  } catch (e) {
+    setAuthErr(friendlyErr(e.code));
+    // Reset the invisible widget so a retry doesn't reuse a spent challenge
+    try {
+      const widgetId = await recaptchaVerifier.render();
+      if (window.grecaptcha) window.grecaptcha.reset(widgetId);
+    } catch (_) {}
+  }
+  setSendOtpLoading(false);
+}
+
+async function resendOtp() {
+  document.getElementById('otpCode').value = '';
+  await sendOtp();
+  document.getElementById('phoneStep1').style.display = 'none';
+  document.getElementById('phoneStep2').style.display = 'block';
+}
+
+function changeNumber() {
+  confirmationResult = null;
+  document.getElementById('otpCode').value = '';
+  document.getElementById('phoneStep2').style.display = 'none';
+  document.getElementById('phoneStep1').style.display = 'block';
+  setAuthErr('');
+}
+
+async function verifyOtp() {
+  if (!confirmationResult) return setAuthErr('Please request a code first.');
+  const { db, doc, setDoc, getAdditionalUserInfo } = window._fb;
+  const otp = document.getElementById('otpCode').value.trim();
+  if (!otp || otp.length < 4) return setAuthErr('Enter the verification code.');
+
+  setAuthErr('');
+  setVerifyLoading(true);
+  try {
+    const cred = await confirmationResult.confirm(otp);
+    const info = getAdditionalUserInfo(cred);
+    if (info?.isNewUser) {
+      const name = document.getElementById('phoneName').value.trim() || 'Wardrobe User';
+      await setDoc(doc(db,'users',cred.user.uid), { name, phone: cred.user.phoneNumber, createdAt: Date.now() });
+    }
+    window.location.href = 'app.html';
+  } catch (e) {
+    setAuthErr(friendlyErr(e.code));
+    setVerifyLoading(false);
+  }
+}
+
 function friendlyErr(code) {
   const map = {
     'auth/invalid-email':'Invalid email address.',
@@ -394,6 +561,12 @@ function friendlyErr(code) {
     'auth/invalid-credential':'Email or password is incorrect.',
     'auth/too-many-requests':'Too many attempts — wait and try again.',
     'auth/network-request-failed':'Network error — check your connection.',
+    'auth/invalid-phone-number':'That phone number doesn\'t look right — include the correct country code.',
+    'auth/missing-phone-number':'Enter a phone number first.',
+    'auth/invalid-verification-code':'That code is incorrect. Double-check and try again.',
+    'auth/code-expired':'This code has expired — request a new one.',
+    'auth/quota-exceeded':'Too many SMS requests right now — try again shortly.',
+    'auth/captcha-check-failed':'Verification failed — please retry.',
   };
   return map[code] || `Error (${code}). Please try again.`;
 }
