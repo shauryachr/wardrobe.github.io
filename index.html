@@ -40,14 +40,38 @@
   }
   #wardrobe-intro.opening .intro-content { opacity: 0; }
 
-  .intro-hanger {
-    width: 46px; height: 46px; margin: 0 auto 1.25rem;
-    transform-origin: 50% 8%;
-    animation: hangerSwing 2.2s ease-in-out infinite;
+  /* Folder-flip preloader — files fanning as a thumb riffles through them */
+  .intro-preloader { width: 108px; height: 78px; margin: 0 auto 1.5rem; overflow: visible; }
+  .intro-preloader .folder {
+    fill: rgba(232,213,176,0.1);
+    stroke: var(--gold);
+    stroke-width: 1.4;
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: folderFlip 1.6s cubic-bezier(.45,0,.2,1) infinite;
   }
-  @keyframes hangerSwing {
-    0%, 100% { transform: rotate(-7deg); }
-    50% { transform: rotate(7deg); }
+  .intro-preloader .folder-dot { fill: var(--gold); opacity: 0.85; }
+  .intro-preloader .f1 { animation-delay: 0s; }
+  .intro-preloader .f2 { animation-delay: 0.12s; }
+  .intro-preloader .f3 { animation-delay: 0.24s; }
+  .intro-preloader .f4 { animation-delay: 0.36s; }
+  .intro-preloader .f5 { animation-delay: 0.48s; }
+  @keyframes folderFlip {
+    0%, 55%, 100% { transform: rotate(0deg) translateY(0); }
+    20% { transform: rotate(-11deg) translateY(-9px); }
+    38% { transform: rotate(4deg) translateY(0); }
+  }
+  .intro-preloader .thumb {
+    fill: var(--gold-light);
+    opacity: 0.92;
+    animation: thumbSweep 1.6s cubic-bezier(.45,0,.2,1) infinite;
+    transform-box: fill-box;
+    transform-origin: 20% 55%;
+  }
+  @keyframes thumbSweep {
+    0% { transform: translateX(-6px) rotate(-4deg); }
+    50% { transform: translateX(58px) rotate(6deg); }
+    100% { transform: translateX(-6px) rotate(-4deg); }
   }
 
   .intro-wordmark {
@@ -64,15 +88,15 @@
   }
   .intro-loader::after {
     content: ''; position: absolute; top: 0; left: 0; height: 100%;
-    width: 0%; background: var(--gold);
-    animation: loaderFill 1.7s cubic-bezier(.6,0,.4,1) forwards;
+    width: var(--fill, 0%); background: var(--gold);
+    transition: width 0.2s linear;
   }
-  @keyframes loaderFill { to { width: 100%; } }
 
   .intro-caption {
     margin-top: 0.9rem; font-size: 0.62rem; letter-spacing: 0.24em;
     text-transform: uppercase; color: rgba(245,240,232,0.4); font-weight: 500;
   }
+  .intro-caption .intro-pct { color: var(--gold); font-weight: 600; margin-left: 0.35em; }
 
   /* Doors */
   .wardrobe-door {
@@ -85,13 +109,11 @@
       linear-gradient(135deg, #2a231b, #1a1510 55%, #120e0a);
   }
   .wardrobe-door::before {
-    /* recessed panel detail */
     content: ''; position: absolute; top: 8%; bottom: 8%; left: 12%; right: 12%;
     border: 1px solid rgba(184,150,90,0.28);
     box-shadow: inset 0 0 40px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(245,240,232,0.03);
   }
   .wardrobe-door::after {
-    /* subtle vertical sheen */
     content: ''; position: absolute; top: 0; bottom: 0; width: 30%;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
   }
@@ -110,14 +132,8 @@
   .wardrobe-door.left .door-handle { right: 6%; }
   .wardrobe-door.right .door-handle { left: 6%; }
 
-  #wardrobe-intro.opening .wardrobe-door.left {
-    transform: rotateY(-112deg);
-    box-shadow: 40px 0 80px rgba(0,0,0,0.6);
-  }
-  #wardrobe-intro.opening .wardrobe-door.right {
-    transform: rotateY(112deg);
-    box-shadow: -40px 0 80px rgba(0,0,0,0.6);
-  }
+  #wardrobe-intro.opening .wardrobe-door.left { transform: rotateY(-112deg); box-shadow: 40px 0 80px rgba(0,0,0,0.6); }
+  #wardrobe-intro.opening .wardrobe-door.right { transform: rotateY(112deg); box-shadow: -40px 0 80px rgba(0,0,0,0.6); }
 
   #wardrobe-intro.closing-out { opacity: 0; transition: opacity 0.6s ease 0.15s; }
 
@@ -127,7 +143,7 @@
   }
 
   @media (max-width: 600px) {
-    .intro-hanger { width: 36px; height: 36px; }
+    .intro-preloader { width: 84px; height: 60px; }
     .intro-wordmark { font-size: 1.25rem; }
     .intro-loader { width: 120px; }
     .door-handle { height: 64px; }
@@ -150,14 +166,12 @@
   .nav-cta { font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.6rem 1.5rem; background: var(--ink); color: var(--cream); border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500; transition: background 0.2s; text-decoration: none; display: inline-block; }
   .nav-cta:hover { background: var(--gold); }
 
-  /* Hamburger — hidden on desktop */
   .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; }
   .nav-hamburger span { display: block; width: 22px; height: 1.5px; background: var(--ink); transition: all 0.25s; }
   .nav-hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
   .nav-hamburger.open span:nth-child(2) { opacity: 0; }
   .nav-hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
 
-  /* Mobile drawer */
   .mobile-menu {
     display: none; position: fixed; top: 64px; left: 0; right: 0; z-index: 99;
     background: rgba(250,248,244,0.98); backdrop-filter: blur(16px);
@@ -246,7 +260,6 @@
   .animate { animation: fadeUp 0.7s ease both; }
   .delay-1 { animation-delay: 0.15s; } .delay-2 { animation-delay: 0.3s; } .delay-3 { animation-delay: 0.45s; } .delay-4 { animation-delay: 0.6s; }
 
-  /* ─── TABLET (≤900px) ─── */
   @media (max-width: 900px) {
     nav { padding: 1.1rem 2rem; }
     .nav-links { display: none; }
@@ -273,7 +286,6 @@
     .footer-links { justify-content: center; }
   }
 
-  /* ─── MOBILE (≤600px) ─── */
   @media (max-width: 600px) {
     nav { padding: 1rem 1.25rem; }
     .nav-logo { font-size: 1.2rem; }
@@ -331,26 +343,41 @@
 </head>
 <body class="intro-lock">
 
-<!-- ══════════════ WARDROBE OPENING INTRO ══════════════ -->
 <div id="wardrobe-intro" aria-hidden="true">
   <div class="intro-glow"></div>
 
   <div class="intro-content">
-    <svg class="intro-hanger" viewBox="0 0 46 46" fill="none">
-      <circle cx="23" cy="7" r="3.2" stroke="#b8965a" stroke-width="1.3"/>
-      <path d="M23 10 L23 15" stroke="#b8965a" stroke-width="1.3"/>
-      <path d="M23 15 C10 15 6 27 23 30 C40 27 36 15 23 15 Z" stroke="#b8965a" stroke-width="1.3"/>
-      <path d="M14 30 L32 30" stroke="#b8965a" stroke-width="1.3"/>
+    <svg class="intro-preloader" viewBox="0 0 108 78" fill="none">
+      <g class="folder f1">
+        <rect x="4" y="18" width="16" height="52" rx="8"/>
+        <circle class="folder-dot" cx="12" cy="58" r="3.4"/>
+      </g>
+      <g class="folder f2">
+        <rect x="22" y="10" width="16" height="60" rx="8"/>
+        <circle class="folder-dot" cx="30" cy="52" r="3.4"/>
+      </g>
+      <g class="folder f3">
+        <rect x="40" y="4" width="16" height="66" rx="8"/>
+        <circle class="folder-dot" cx="48" cy="48" r="3.4"/>
+      </g>
+      <g class="folder f4">
+        <rect x="58" y="10" width="16" height="60" rx="8"/>
+        <circle class="folder-dot" cx="66" cy="52" r="3.4"/>
+      </g>
+      <g class="folder f5">
+        <rect x="76" y="18" width="16" height="52" rx="8"/>
+        <circle class="folder-dot" cx="84" cy="58" r="3.4"/>
+      </g>
+      <path class="thumb" d="M6 44 Q26 38 34 46 Q40 52 32 58 Q18 64 4 54 Z"/>
     </svg>
     <div class="intro-wordmark">Virtual<span>.</span>Wardrobe</div>
-    <div class="intro-loader"></div>
-    <div class="intro-caption">Opening your wardrobe</div>
+    <div class="intro-loader" id="introLoader"></div>
+    <div class="intro-caption">Opening your wardrobe<span class="intro-pct" id="introPct"></span></div>
   </div>
 
   <div class="wardrobe-door left"><div class="door-handle"></div></div>
   <div class="wardrobe-door right"><div class="door-handle"></div></div>
 </div>
-<!-- ══════════════ END INTRO ══════════════ -->
 
 <nav>
   <a href="index.html" class="nav-logo">Virtual<span>.</span>Wardrobe</a>
@@ -540,24 +567,18 @@
     hamburger.setAttribute('aria-label', 'Open menu');
   }
 
-  // Close on outside click
   document.addEventListener('click', (e) => {
     if (!nav.contains(e.target) && !mobileMenu.contains(e.target)) closeMenu();
   });
 
   const nav = document.querySelector('nav');
 
-  /* ══════════════ WARDROBE INTRO CONTROLLER ══════════════ */
   (function () {
     const intro = document.getElementById('wardrobe-intro');
+    const loaderBar = document.getElementById('introLoader');
+    const pctLabel = document.getElementById('introPct');
     const body = document.body;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    function finishIntro() {
-      intro.classList.add('closing-out');
-      body.classList.remove('intro-lock');
-      setTimeout(() => intro.classList.add('intro-hidden'), 650);
-    }
 
     if (reduceMotion || !intro) {
       if (intro) intro.classList.add('intro-hidden');
@@ -565,22 +586,54 @@
       return;
     }
 
-    // Hold on the loading state briefly, then swing the doors open.
-    const OPEN_AT = 1650;      // ms before doors start opening
-    const CLOSE_AFTER = 1450;  // ms for the door swing itself, then fade overlay
+    const CLOSE_AFTER = 1450;
+    const MIN_DISPLAY = 900;
+    const MAX_WAIT = 4000;
 
-    const openTimer = setTimeout(() => {
+    let doneFired = false;
+
+    function openDoors() {
+      if (doneFired) return;
+      doneFired = true;
       intro.classList.add('opening');
       setTimeout(finishIntro, CLOSE_AFTER);
-    }, OPEN_AT);
+    }
 
-    // Let an impatient visitor skip straight in with a click or key press.
+    function finishIntro() {
+      intro.classList.add('closing-out');
+      body.classList.remove('intro-lock');
+      setTimeout(() => intro.classList.add('intro-hidden'), 650);
+    }
+
+    const fontsReady = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+    const windowLoaded = new Promise(resolve => {
+      if (document.readyState === 'complete') resolve();
+      else window.addEventListener('load', resolve, { once: true });
+    });
+    const minDisplay = new Promise(resolve => setTimeout(resolve, MIN_DISPLAY));
+    const maxWait = new Promise(resolve => setTimeout(resolve, MAX_WAIT));
+
+    let progress = 0;
+    const progressTimer = setInterval(() => {
+      progress += (95 - progress) * 0.12 + 0.4;
+      const shown = Math.min(97, Math.round(progress));
+      pctLabel.textContent = shown + '%';
+      loaderBar.style.setProperty('--fill', shown + '%');
+    }, 120);
+
+    Promise.race([
+      Promise.all([fontsReady, windowLoaded, minDisplay]),
+      maxWait
+    ]).then(() => {
+      clearInterval(progressTimer);
+      pctLabel.textContent = '100%';
+      loaderBar.style.setProperty('--fill', '100%');
+      openDoors();
+    });
+
     function skipIntro() {
-      clearTimeout(openTimer);
-      if (!intro.classList.contains('opening')) {
-        intro.classList.add('opening');
-        setTimeout(finishIntro, CLOSE_AFTER);
-      }
+      clearInterval(progressTimer);
+      openDoors();
       window.removeEventListener('click', skipIntro);
       window.removeEventListener('keydown', skipIntro);
     }
