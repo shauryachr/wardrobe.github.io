@@ -15,31 +15,7 @@
   html { scroll-behavior: smooth; }
   body { font-family: 'DM Sans', sans-serif; background: var(--warm-white); color: var(--ink); overflow-x: hidden; }
   body.intro-lock { overflow: hidden; height: 100vh; }
-
-  /* ══════════════ WARDROBE INTRO ══════════════ */
-  #wardrobe-intro {
-    position: fixed; inset: 0; z-index: 9999;
-    perspective: 2400px; perspective-origin: 50% 50%;
-    background: var(--ink);
-  }
-  #wardrobe-intro.intro-hidden { display: none; }
-
-  .intro-glow {
-    position: absolute; inset: 0;
-    background: radial-gradient(ellipse 60% 55% at 50% 50%, rgba(184,150,90,0.35), transparent 70%);
-    opacity: 0; transition: opacity 1.1s ease;
-    pointer-events: none;
-  }
-  #wardrobe-intro.opening .intro-glow { opacity: 1; }
-
-  .intro-content {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 5; text-align: center;
-    opacity: 1; transition: opacity 0.5s ease;
-  }
-  #wardrobe-intro.opening .intro-content { opacity: 0; }
-
+ 
   /* ─────────── Atom preloader ─────────── */
   .intro-preloader {
     width: 128px; height: 128px; margin: 0 auto 1.6rem;
