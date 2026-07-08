@@ -40,38 +40,98 @@
   }
   #wardrobe-intro.opening .intro-content { opacity: 0; }
 
-  /* Folder-flip preloader — files fanning as a thumb riffles through them */
-  .intro-preloader { width: 108px; height: 78px; margin: 0 auto 1.5rem; overflow: visible; }
-  .intro-preloader .folder {
-    fill: rgba(232,213,176,0.1);
-    stroke: var(--gold);
-    stroke-width: 1.4;
-    transform-box: fill-box;
-    transform-origin: 50% 100%;
-    animation: folderFlip 1.6s cubic-bezier(.45,0,.2,1) infinite;
+  /* ─────────── Atom preloader ─────────── */
+  .intro-preloader {
+    width: 128px; height: 128px; margin: 0 auto 1.6rem;
+    position: relative;
   }
-  .intro-preloader .folder-dot { fill: var(--gold); opacity: 0.85; }
-  .intro-preloader .f1 { animation-delay: 0s; }
-  .intro-preloader .f2 { animation-delay: 0.12s; }
-  .intro-preloader .f3 { animation-delay: 0.24s; }
-  .intro-preloader .f4 { animation-delay: 0.36s; }
-  .intro-preloader .f5 { animation-delay: 0.48s; }
-  @keyframes folderFlip {
-    0%, 55%, 100% { transform: rotate(0deg) translateY(0); }
-    20% { transform: rotate(-11deg) translateY(-9px); }
-    38% { transform: rotate(4deg) translateY(0); }
+
+  /* ambient sonar rings pulsing outward from the whole atom */
+  .atom-halo {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 1px solid rgba(184,150,90,0.35);
+    animation: haloPing 2.6s cubic-bezier(.25,.6,.4,1) infinite;
   }
-  .intro-preloader .thumb {
-    fill: var(--gold-light);
-    opacity: 0.92;
-    animation: thumbSweep 1.6s cubic-bezier(.45,0,.2,1) infinite;
-    transform-box: fill-box;
-    transform-origin: 20% 55%;
+  .atom-halo.h2 { animation-delay: 0.9s; }
+  .atom-halo.h3 { animation-delay: 1.8s; }
+  @keyframes haloPing {
+    0%   { transform: scale(0.35); opacity: 0.5; }
+    75%  { transform: scale(1); opacity: 0; }
+    100% { transform: scale(1); opacity: 0; }
   }
-  @keyframes thumbSweep {
-    0% { transform: translateX(-6px) rotate(-4deg); }
-    50% { transform: translateX(58px) rotate(6deg); }
-    100% { transform: translateX(-6px) rotate(-4deg); }
+
+  .atom {
+    position: absolute; inset: 0;
+    animation: atomSpin 9s linear infinite;
+    transform-style: preserve-3d;
+  }
+  @keyframes atomSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* glowing nucleus at the core, gently breathing */
+  .nucleus {
+    position: absolute; top: 50%; left: 50%;
+    width: 15px; height: 15px; margin: -7.5px 0 0 -7.5px;
+    border-radius: 50%; z-index: 5;
+    background: radial-gradient(circle at 35% 30%, var(--gold-light), var(--gold) 55%, #8a6c3d 100%);
+    box-shadow: 0 0 10px 2px rgba(184,150,90,0.6), 0 0 26px 8px rgba(184,150,90,0.3);
+    animation: nucleusPulse 1.7s ease-in-out infinite;
+  }
+  @keyframes nucleusPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 10px 2px rgba(184,150,90,0.6), 0 0 26px 8px rgba(184,150,90,0.3); }
+    50%      { transform: scale(1.22); box-shadow: 0 0 16px 4px rgba(184,150,90,0.85), 0 0 38px 12px rgba(184,150,90,0.4); }
+  }
+
+  /* three elliptical orbits, each tilted like a classic atom diagram */
+  .orbit {
+    position: absolute; top: 50%; left: 50%;
+    width: 128px; height: 50px; margin: -25px 0 0 -64px;
+    border: 1px solid rgba(184,150,90,0.4);
+    border-radius: 50%;
+  }
+  .orbit1 { transform: rotate(0deg); }
+  .orbit2 { transform: rotate(60deg); }
+  .orbit3 { transform: rotate(120deg); }
+
+  /* each orbit carries a lead electron plus two fading trail-ghosts,
+     all sharing one spin animation offset by negative delays so they
+     appear strung out along the path like a comet tail */
+  .e-wrap { position: absolute; inset: 0; animation: spin linear infinite; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  .orbit1 .e-wrap { animation-duration: 2.2s; }
+  .orbit2 .e-wrap { animation-duration: 2.9s; animation-direction: reverse; }
+  .orbit3 .e-wrap { animation-duration: 2.5s; }
+
+  .e-wrap.lead  { animation-delay: 0s; }
+  .e-wrap.tail1 { animation-delay: -0.09s; }
+  .e-wrap.tail2 { animation-delay: -0.18s; }
+
+  .electron {
+    position: absolute; top: -4px; left: 50%;
+    width: 8px; height: 8px; margin-left: -4px;
+    border-radius: 50%;
+    background: var(--gold-light);
+    box-shadow: 0 0 8px 2px rgba(232,213,176,0.85), 0 0 16px 5px rgba(184,150,90,0.4);
+  }
+  .e-wrap.tail1 .electron { width: 5px; height: 5px; margin-left: -2.5px; opacity: 0.55; box-shadow: 0 0 6px 1px rgba(232,213,176,0.5); }
+  .e-wrap.tail2 .electron { width: 3px; height: 3px; margin-left: -1.5px; opacity: 0.28; box-shadow: none; }
+
+  /* tiny drifting sparkles scattered around the atom for extra shimmer */
+  .sparkle {
+    position: absolute; width: 3px; height: 3px; border-radius: 50%;
+    background: var(--gold-light);
+    animation: sparkleDrift 2.4s ease-in-out infinite;
+  }
+  .sparkle.s1 { top: 6%;  left: 12%; animation-delay: 0s; }
+  .sparkle.s2 { top: 82%; left: 20%; animation-delay: 0.5s; }
+  .sparkle.s3 { top: 14%; left: 86%; animation-delay: 1s; }
+  .sparkle.s4 { top: 78%; left: 82%; animation-delay: 1.5s; }
+  @keyframes sparkleDrift {
+    0%, 100% { opacity: 0; transform: translateY(0) scale(0.6); }
+    50%      { opacity: 1; transform: translateY(-6px) scale(1.3); }
   }
 
   .intro-wordmark {
@@ -143,7 +203,8 @@
   }
 
   @media (max-width: 600px) {
-    .intro-preloader { width: 84px; height: 60px; }
+    .intro-preloader { width: 96px; height: 96px; }
+    .orbit { width: 96px; height: 38px; margin: -19px 0 0 -48px; }
     .intro-wordmark { font-size: 1.25rem; }
     .intro-loader { width: 120px; }
     .door-handle { height: 64px; }
@@ -347,29 +408,37 @@
   <div class="intro-glow"></div>
 
   <div class="intro-content">
-    <svg class="intro-preloader" viewBox="0 0 108 78" fill="none">
-      <g class="folder f1">
-        <rect x="4" y="18" width="16" height="52" rx="8"/>
-        <circle class="folder-dot" cx="12" cy="58" r="3.4"/>
-      </g>
-      <g class="folder f2">
-        <rect x="22" y="10" width="16" height="60" rx="8"/>
-        <circle class="folder-dot" cx="30" cy="52" r="3.4"/>
-      </g>
-      <g class="folder f3">
-        <rect x="40" y="4" width="16" height="66" rx="8"/>
-        <circle class="folder-dot" cx="48" cy="48" r="3.4"/>
-      </g>
-      <g class="folder f4">
-        <rect x="58" y="10" width="16" height="60" rx="8"/>
-        <circle class="folder-dot" cx="66" cy="52" r="3.4"/>
-      </g>
-      <g class="folder f5">
-        <rect x="76" y="18" width="16" height="52" rx="8"/>
-        <circle class="folder-dot" cx="84" cy="58" r="3.4"/>
-      </g>
-      <path class="thumb" d="M6 44 Q26 38 34 46 Q40 52 32 58 Q18 64 4 54 Z"/>
-    </svg>
+    <div class="intro-preloader">
+      <div class="atom-halo h1"></div>
+      <div class="atom-halo h2"></div>
+      <div class="atom-halo h3"></div>
+
+      <span class="sparkle s1"></span>
+      <span class="sparkle s2"></span>
+      <span class="sparkle s3"></span>
+      <span class="sparkle s4"></span>
+
+      <div class="atom">
+        <div class="nucleus"></div>
+
+        <div class="orbit orbit1">
+          <div class="e-wrap lead"><span class="electron"></span></div>
+          <div class="e-wrap tail1"><span class="electron"></span></div>
+          <div class="e-wrap tail2"><span class="electron"></span></div>
+        </div>
+        <div class="orbit orbit2">
+          <div class="e-wrap lead"><span class="electron"></span></div>
+          <div class="e-wrap tail1"><span class="electron"></span></div>
+          <div class="e-wrap tail2"><span class="electron"></span></div>
+        </div>
+        <div class="orbit orbit3">
+          <div class="e-wrap lead"><span class="electron"></span></div>
+          <div class="e-wrap tail1"><span class="electron"></span></div>
+          <div class="e-wrap tail2"><span class="electron"></span></div>
+        </div>
+      </div>
+    </div>
+
     <div class="intro-wordmark">Virtual<span>.</span>Wardrobe</div>
     <div class="intro-loader" id="introLoader"></div>
     <div class="intro-caption">Opening your wardrobe<span class="intro-pct" id="introPct"></span></div>
