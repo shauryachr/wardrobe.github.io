@@ -10,7 +10,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
          signInWithPopup, GoogleAuthProvider, onAuthStateChanged,
-         RecaptchaVerifier, signInWithPhoneNumber, getAdditionalUserInfo }
+         RecaptchaVerifier, signInWithPhoneNumber, getAdditionalUserInfo, sendPasswordResetEmail }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, setDoc }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -34,6 +34,7 @@ window._fb = { auth, db, gProvider,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   signInWithPopup, onAuthStateChanged,
   RecaptchaVerifier, signInWithPhoneNumber, getAdditionalUserInfo,
+  sendPasswordResetEmail,
   doc, setDoc };
 
 console.log('✅ Firebase loaded OK (login)');
@@ -46,7 +47,7 @@ console.log('✅ Firebase loaded OK (login)');
   --gold:#b8965a;--gold-light:#e8d5b0;--gold-dim:rgba(184,150,90,0.15);
   --muted:#7a7165;--accent:#8b4c3c;
   --border:rgba(184,150,90,0.14);--border-strong:rgba(184,150,90,0.35);
-  --err:#e07070;
+  --err:#e07070;--ok:#6fa87a;
 }
 html,body{height:100%}
 body{
@@ -152,6 +153,14 @@ body{
 .auth-err.visible{display:flex}
 .auth-err::before{content:'⚠';font-size:.72rem;flex-shrink:0}
 
+.auth-ok{
+  font-size:.72rem;color:var(--ok);margin-bottom:1rem;min-height:0;text-align:left;
+  display:none;align-items:center;gap:.45rem;background:rgba(111,168,122,.08);
+  border:1px solid rgba(111,168,122,.3);padding:.55rem .7rem;
+}
+.auth-ok.visible{display:flex}
+.auth-ok::before{content:'✓';font-size:.72rem;flex-shrink:0}
+
 .auth-field{margin-bottom:1.1rem;position:relative}
 .auth-field label{
   display:block;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;
@@ -171,6 +180,13 @@ body{
 .otp-hint{font-size:.7rem;color:var(--muted);margin-bottom:1rem;line-height:1.6}
 .otp-hint strong{color:var(--ink);font-weight:500}
 .otp-code-input{letter-spacing:.35em;font-size:1rem !important;text-align:center}
+
+.forgot-pass-row{display:flex;justify-content:flex-end;margin-top:-.6rem;margin-bottom:1.1rem}
+.forgot-pass-row button{
+  background:none;border:none;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;
+  font-size:.68rem;text-decoration:underline;text-underline-offset:2px;
+}
+.forgot-pass-row button:hover{color:var(--gold)}
 
 .btn-auth{
   width:100%;padding:.72rem;background:var(--ink);color:var(--cream);
@@ -252,7 +268,6 @@ body{
   <div class="brand-mid">
     <div class="brand-art">
       <svg viewBox="0 0 320 260" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- hanger + garment, drawn as a single continuous gold thread -->
         <path class="thread-line" d="M160 18 a10 10 0 1 1 -0.1 0 M160 28 L160 46 M110 46 L210 46 M160 46 L60 118 L60 232 Q60 242 70 242 L250 242 Q260 242 260 232 L260 118 L160 46" />
         <path class="thread-line delay" d="M92 132 Q160 168 228 132 M100 176 L100 214 M160 190 L160 220 M220 176 L220 214" />
         <circle class="thread-dot" cx="160" cy="18" r="3.5" />
@@ -304,10 +319,12 @@ body{
       </div>
 
       <div id="authErr" class="auth-err"></div>
+      <div id="authOk" class="auth-ok"></div>
 
       <div id="tabLogin" class="tab-panel active">
         <div class="auth-field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email"></div>
         <div class="auth-field"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')emailSignIn()"></div>
+        <div class="forgot-pass-row"><button onclick="openForgotPassword()">Forgot password?</button></div>
         <button class="btn-auth" id="btnSignIn" onclick="emailSignIn()">Sign In</button>
         <div class="auth-sep">or</div>
         <button class="btn-google" onclick="googleSignIn()">
@@ -373,6 +390,15 @@ body{
           <div class="form-footer"><button onclick="changeNumber()">Change phone number</button></div>
         </div>
       </div>
+
+      <div id="tabForgot" class="tab-panel">
+        <div class="auth-field">
+          <label>Email</label>
+          <input type="email" id="forgotEmail" placeholder="you@example.com" autocomplete="email" onkeydown="if(event.key==='Enter')sendResetEmail()">
+        </div>
+        <button class="btn-auth" id="btnSendReset" onclick="sendResetEmail()">Send Reset Link</button>
+        <div class="form-footer"><button onclick="closeForgotPassword()">Back to sign in</button></div>
+      </div>
     </div>
   </div>
 </main>
@@ -404,6 +430,7 @@ function switchAuthTab(tab) {
   document.getElementById('tabLogin').classList.toggle('active', tab==='login');
   document.getElementById('tabRegister').classList.toggle('active', tab==='register');
   document.getElementById('tabPhone').classList.toggle('active', tab==='phone');
+  document.getElementById('tabForgot').classList.remove('active');
 
   if (tab==='login') {
     document.getElementById('formHeading').innerHTML = 'Welcome <em>back</em>';
@@ -416,9 +443,65 @@ function switchAuthTab(tab) {
     document.getElementById('formSub').textContent = "We'll text you a one-time code — no password needed.";
   }
   setAuthErr('');
+  setAuthOk('');
 }
+
+// ── FORGOT PASSWORD (email/password users only) ──
+function openForgotPassword() {
+  document.getElementById('tabLogin').classList.remove('active');
+  document.getElementById('tabRegister').classList.remove('active');
+  document.getElementById('tabPhone').classList.remove('active');
+  document.getElementById('tabForgot').classList.add('active');
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tabIndicator').style.opacity = '0';
+
+  document.getElementById('formHeading').innerHTML = 'Reset your <em>password</em>';
+  document.getElementById('formSub').textContent = "Enter your email — we'll send a secure link to set a new password.";
+  setAuthErr(''); setAuthOk('');
+
+  // Prefill with whatever they already typed on the login tab
+  const existing = document.getElementById('loginEmail').value.trim();
+  document.getElementById('forgotEmail').value = existing;
+  setTimeout(() => document.getElementById('forgotEmail').focus(), 50);
+}
+function closeForgotPassword() {
+  document.getElementById('tabIndicator').style.opacity = '1';
+  switchAuthTab('login');
+}
+function setResetLoading(loading) {
+  const btn = document.getElementById('btnSendReset');
+  btn.disabled = loading;
+  btn.textContent = loading ? 'Sending…' : 'Send Reset Link';
+}
+async function sendResetEmail() {
+  if (!window._fb) return setAuthErr('Still initialising — please wait.');
+  const { auth, sendPasswordResetEmail } = window._fb;
+  const email = document.getElementById('forgotEmail').value.trim();
+  if (!email) return setAuthErr('Enter your email address.');
+
+  setAuthErr(''); setAuthOk(''); setResetLoading(true);
+  try {
+    await sendPasswordResetEmail(auth, email);
+    setAuthOk(`Reset link sent to ${email}. Check your inbox (and spam folder).`);
+  } catch (e) {
+    // Don't reveal whether an account exists — generic message for user-not-found
+    if (e.code === 'auth/user-not-found') {
+      setAuthOk(`If an account exists for ${email}, a reset link has been sent.`);
+    } else {
+      setAuthErr(friendlyErr(e.code));
+    }
+  }
+  setResetLoading(false);
+}
+
 function setAuthErr(msg) {
   const el = document.getElementById('authErr');
+  el.textContent = msg;
+  el.classList.toggle('visible', !!msg);
+  if (msg) setAuthOk('');
+}
+function setAuthOk(msg) {
+  const el = document.getElementById('authOk');
   el.textContent = msg;
   el.classList.toggle('visible', !!msg);
 }
@@ -504,7 +587,6 @@ async function sendOtp() {
     document.getElementById('otpCode').focus();
   } catch (e) {
     setAuthErr(friendlyErr(e.code));
-    // Reset the invisible widget so a retry doesn't reuse a spent challenge
     try {
       const widgetId = await recaptchaVerifier.render();
       if (window.grecaptcha) window.grecaptcha.reset(widgetId);
