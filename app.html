@@ -586,7 +586,7 @@ const COLOR_MAP = {
 /* GROQ AI STYLIST (perfect combos, chat, and inspiration)
    Requests are proxied through a Vercel serverless function so the
    Groq API key never appears in client-side source. */
-const GROQ_PROXY_URL = "https://groq.yourname.workers.dev";
+const GROQ_PROXY_URL = "https://groq.shauryachr.workers.dev";
 
 async function callGroqJSON(prompt, maxTokens = 1200) {
   const response = await fetch(GROQ_PROXY_URL, {
